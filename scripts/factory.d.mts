@@ -6,6 +6,7 @@ export function enqueueProvision(
     name?: string;
     tier: string;
     brand?: string | null;
+    logoUrl?: string | null;
     port?: number;
     adminEmail?: string;
   },

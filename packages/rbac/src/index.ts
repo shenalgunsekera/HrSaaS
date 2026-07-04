@@ -52,9 +52,11 @@ export function isAllowed(defs: RoleDefinition[], req: AccessRequest): boolean {
   if (!def) return false;
   return def.permissions.some(
     (p) =>
-      p.moduleKey === req.moduleKey &&
+      (p.moduleKey === req.moduleKey || p.moduleKey === '*') &&
       p.action === req.action &&
       scopeRank[p.scope] >= scopeRank[req.targetScope] &&
       (!req.fieldKey || !p.fieldKeys || p.fieldKeys.includes(req.fieldKey)),
   );
 }
+
+export { DEFAULT_ROLE_DEFINITIONS } from './defaults';

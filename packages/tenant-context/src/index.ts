@@ -26,10 +26,12 @@ export interface TenantContext {
 }
 
 /**
- * Contract for the edge resolver. Implementation (control-plane lookup with
- * caching) lands in Phase 3; the marketing app resolves no tenant.
+ * Contract for the edge resolver — implemented in `./resolve`
+ * (`createTenantResolver`); the marketing app resolves no tenant.
  */
 export type ResolveTenant = (hostname: string) => Promise<TenantContext | null>;
+
+export { createTenantResolver, type ResolverOptions } from './resolve';
 
 /**
  * Contract for the tenant-aware data access layer: given the request's

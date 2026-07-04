@@ -49,6 +49,7 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
     maxTierHeld: tenant.max_tier_held,
   });
   const brand = tenant.theme?.colors?.['--brand'];
+  const logoUrl = (tenant.theme as { logoUrl?: string } | null)?.logoUrl;
 
   return (
     <main className="relative min-h-svh">
@@ -57,7 +58,15 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
         <Link href="/" className="font-body text-xs tracking-widest3 text-brand uppercase">
           ← All tenants
         </Link>
-        <div className="flex flex-wrap items-baseline gap-5 mt-4 mb-2">
+        <div className="flex flex-wrap items-center gap-5 mt-4 mb-2">
+          {logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl}
+              alt={`${tenant.display_name} logo`}
+              className="h-16 w-16 object-contain border border-line bg-ink p-1"
+            />
+          )}
           <h1 className="font-display text-chalk leading-[0.92]" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
             {tenant.display_name.toUpperCase()}
           </h1>
@@ -102,6 +111,56 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
             Upgrade enables already-present modules instantly; downgrade retains-but-locks
             higher-tier data (never deletes).
           </p>
+        </section>
+
+        {/* branding: logo + brand color, updatable at any time, applies live */}
+        <section className="border border-line bg-surface p-6 mb-10">
+          <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+            Branding — applies to the live instance immediately
+          </p>
+          <form
+            method="post"
+            action={`/api/tenants/${tenant.slug}/branding`}
+            encType="multipart/form-data"
+            className="flex flex-wrap items-end gap-3"
+          >
+            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+              Brand color
+              <input
+                name="brand"
+                placeholder="#4F46E5"
+                pattern="#[0-9a-fA-F]{6}"
+                defaultValue={brand ?? ''}
+                className="border border-line bg-ink px-4 py-3 font-body text-sm text-chalk focus:outline-none focus:border-brand"
+              />
+            </label>
+            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+              Logo URL
+              <input
+                name="logoUrl"
+                placeholder="https://…/logo.png"
+                className="border border-line bg-ink px-4 py-3 font-body text-sm text-chalk focus:outline-none focus:border-brand"
+              />
+            </label>
+            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+              or upload (≤300KB)
+              <input
+                type="file"
+                name="logoFile"
+                accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                className="font-body text-sm text-mute-1"
+              />
+            </label>
+            <label className="flex items-center gap-2 font-body text-xs text-mute-2 uppercase tracking-widest pb-3">
+              <input type="checkbox" name="clearLogo" /> clear logo
+            </label>
+            <button
+              type="submit"
+              className="px-8 py-3 bg-brand-gradient text-white font-display text-base tracking-widest uppercase shadow-brand"
+            >
+              Update branding
+            </button>
+          </form>
         </section>
 
         {/* resolved entitlements */}

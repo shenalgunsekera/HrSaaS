@@ -234,8 +234,9 @@ export async function executeRun(cp, cpInfo, runId, log = console.log) {
 }
 
 /** Upsert the tenant row and enqueue a provision run. Returns { tenantId, runId }. */
-export async function enqueueProvision(cp, { slug, name, tier, brand, port, adminEmail }) {
-  const theme = themeFromBrand(brand ?? null);
+export async function enqueueProvision(cp, { slug, name, tier, brand, logoUrl, port, adminEmail }) {
+  let theme = themeFromBrand(brand ?? null);
+  if (logoUrl) theme = { ...(theme ?? {}), logoUrl };
   const [tenant] = await cp`
     insert into tenants (slug, legal_name, display_name, tier, max_tier_held, status, theme)
     values (${slug}, ${name ?? slug}, ${name ?? slug}, ${tier}, ${tier}, 'provisioning', ${theme})

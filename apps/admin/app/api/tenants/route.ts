@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
   const tier = body.tier ?? 'L1';
   const name = body.name?.trim() || slug;
   const brand = body.brand?.trim() || null;
+  const logoUrl = body.logoUrl?.trim() || null;
 
   if (!SLUG_RE.test(slug)) {
     return NextResponse.json({ error: 'invalid slug' }, { status: 400 });
@@ -34,9 +35,12 @@ export async function POST(request: NextRequest) {
   if (brand && !/^#[0-9a-fA-F]{6}$/.test(brand)) {
     return NextResponse.json({ error: 'invalid brand color' }, { status: 400 });
   }
+  if (logoUrl && !/^https?:\/\//.test(logoUrl) && !logoUrl.startsWith('data:image/')) {
+    return NextResponse.json({ error: 'logo must be an http(s) URL' }, { status: 400 });
+  }
 
   const sql = cp();
-  const { tenantId, runId } = await enqueueProvision(sql, { slug, name, tier, brand });
+  const { tenantId, runId } = await enqueueProvision(sql, { slug, name, tier, brand, logoUrl });
   await sql`insert into control_plane_audit_log (actor, action, tenant_id, detail)
     values ('system-admin', 'tenant.create_requested', ${tenantId}, ${sql.json({ tier, runId })})`;
 

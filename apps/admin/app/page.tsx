@@ -63,6 +63,10 @@ export default async function TenantList() {
             Brand color
             <input name="brand" placeholder="#4F46E5" pattern="#[0-9a-fA-F]{6}" className={input} />
           </label>
+          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            Logo URL
+            <input name="logoUrl" placeholder="https://…/logo.png" className={input} />
+          </label>
           <button
             type="submit"
             className="px-8 py-3 bg-brand-gradient text-white font-display text-base tracking-widest uppercase shadow-brand"

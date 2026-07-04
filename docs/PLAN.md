@@ -10,7 +10,7 @@ before the next starts.
 | 0 | Foundations: monorepo, design tokens + motion, control-plane schema, ADRs | ✅ **Complete** (2026-07-04) |
 | 1 | One reproducible tenant (containerized app, one-command provision) | ✅ **Complete** (2026-07-05) |
 | 2 | Factory + control-plane console + entitlement flips | ✅ **Complete** (2026-07-05) |
-| 3 | Isolation end-to-end: dedicated DB per tenant, RLS, RBAC, tenant resolution | ⬜ |
+| 3 | Isolation end-to-end: dedicated DB per tenant, RLS, RBAC, tenant resolution | ✅ **Complete** (2026-07-05) |
 | 4 | Dynamic schema engine (wizard, generated forms, all feature-sheet templates) | ⬜ |
 | 5 | Marketing site + consultation → provisioning handoff | ⬜ |
 | 6 | L1 modules (incl. SL statutory payroll + gratuity, Leave↔Attendance↔Payroll coupling) | ⬜ |
@@ -101,6 +101,28 @@ before the next starts.
   no redeploy, no migration, flag flip only.
 - Admin list + detail pages render from the control plane, including the
   10-step provisioning ledger.
+
+## Phase 3 — what was built
+
+- **Tenant resolution** (`@hr/tenant-context`): control-plane-backed resolver
+  (hostname or pinned slug), 30s cache, pluggable secret resolution, no
+  fallthrough for unknown hosts. Wired into `apps/app` via `lib/tenant.ts`;
+  `/status` now resolves per request. Verified: ONE host-mode process served
+  acme/globex/initech correctly by Host header alone; evil.localhost got
+  nothing.
+- **RLS groundwork** (tenant migration 0001): RLS enabled on all tenant
+  tables, deny-by-default, minimal `hr_app` grants/policies. Applied fleet-wide
+  via the new `npm run migrate:tenants` orchestrator (per-tenant ledger).
+- **RBAC defaults** + 15 unit tests (`npm run test:unit`); 6 isolation tests
+  (`npm run test:isolation`).
+- **Admin auth**: Basic-auth proxy; refuses non-localhost when unconfigured
+  (verified 403 on spoofed Host). Interim until central IdP (ADR-0007 §6).
+- **Branding**: company logos (URL or ≤300KB upload → data URI locally) +
+  brand color editable any time in admin; applies to live instances instantly.
+  Tier flips at any time with data preserved — verified globex L3→L1→L3 with
+  member data intact throughout.
+- **Fleet tooling**: `npm run redeploy` (one image → all tenants),
+  `npm run migrate:tenants`. See ADR-0010.
 
 ## Changelog
 
