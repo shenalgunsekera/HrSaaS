@@ -9,7 +9,7 @@ before the next starts.
 |---|---|---|
 | 0 | Foundations: monorepo, design tokens + motion, control-plane schema, ADRs | ✅ **Complete** (2026-07-04) |
 | 1 | One reproducible tenant (containerized app, one-command provision) | ✅ **Complete** (2026-07-05) |
-| 2 | Factory + control-plane console + entitlement flips | ⬜ |
+| 2 | Factory + control-plane console + entitlement flips | ✅ **Complete** (2026-07-05) |
 | 3 | Isolation end-to-end: dedicated DB per tenant, RLS, RBAC, tenant resolution | ⬜ |
 | 4 | Dynamic schema engine (wizard, generated forms, all feature-sheet templates) | ⬜ |
 | 5 | Marketing site + consultation → provisioning handoff | ⬜ |
@@ -76,8 +76,37 @@ before the next starts.
 - Idempotency verified: re-running acme's provision skipped all 10 steps and
   reported the live instance.
 
+## Phase 2 — what was built
+
+- **Shared factory module** (`scripts/factory.mjs`): `enqueueProvision` +
+  `executeRun` used identically by the CLI, the worker, and the admin API —
+  one pipeline, three entry points.
+- **Queue worker** (`services/provisioner/src/worker.mjs`): claims queued
+  `provisioning_runs` with FOR UPDATE SKIP LOCKED (multi-worker safe),
+  executes unattended, applies control-plane migrations on boot. Failed runs
+  keep their step ledger; re-queueing resumes at the failed step.
+- **Admin console** (`apps/admin`): tenant list + create form (`/`), tenant
+  detail (`/tenants/[slug]`) with one-click tier flips, resolved entitlement
+  matrix (locks visible), domains, and per-run step ledgers. API:
+  `POST /api/tenants` (create/queue), `POST /api/tenants/[slug]/tier`.
+  ⚠ No auth yet — vendor console must not be exposed before Phase 3 auth.
+- **Control plane migration 0001**: `provisioning_runs.params`.
+
+## Phase 2 DoD verification (2026-07-05)
+
+- `POST /api/tenants {initech, L2, #E11D48}` → worker claimed the run and
+  provisioned unattended in **~10 s**; instance live with crimson brand at L2.
+- Live tier flip on a running tenant (globex): L3→L1 rendered 10 modules
+  retained-but-locked on the instance immediately; L1→L3 restored them —
+  no redeploy, no migration, flag flip only.
+- Admin list + detail pages render from the control plane, including the
+  10-step provisioning ledger.
+
 ## Changelog
 
+- **2026-07-05** — Phase 2 delivered: queue-backed unattended factory worker,
+  System Admin console over the control plane, live tier flips with
+  retain-but-lock verified on running instances.
 - **2026-07-05** — Phase 1 delivered: containerized app, idempotent one-command
   tenant factory (local Docker driver), two live isolated tenants differing
   only by config. ADR-0008/0009 accepted (user approved recommended defaults).

@@ -1,0 +1,1 @@
+ALTER TABLE "provisioning_runs" ADD COLUMN "params" jsonb;

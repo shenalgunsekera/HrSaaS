@@ -6,6 +6,18 @@ Prereqs: Docker Desktop running, `npm install` done, image built once:
 npm run docker:build:app        # builds hr-app:dev (one image for ALL tenants)
 ```
 
+## Unattended mode (admin console + worker)
+
+```sh
+npm run worker                      # factory worker (claims queued runs)
+npm run dev:admin                   # System Admin console → http://localhost:3002
+```
+
+Create a tenant in the console (or `POST /api/tenants` with
+`{slug,name,tier,brand}`) — the worker provisions it unattended; watch the
+step ledger on the tenant detail page. Tier flips on the detail page apply to
+live instances immediately (downgrade = retain-but-lock, never delete).
+
 ## Provision (one command, zero manual steps, idempotent)
 
 ```sh

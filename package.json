@@ -15,6 +15,7 @@
   },
   "scripts": {
     "provision": "node scripts/provision-tenant.mjs",
+    "worker": "node services/provisioner/src/worker.mjs",
     "teardown": "node scripts/teardown-tenant.mjs",
     "docker:build:app": "docker build -f docker/app.Dockerfile -t hr-app:dev .",
     "dev:app": "npm run dev --workspace apps/app",

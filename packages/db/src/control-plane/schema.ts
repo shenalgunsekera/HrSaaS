@@ -174,6 +174,8 @@ export const provisioningRuns = pgTable(
       .references(() => tenants.id, { onDelete: 'cascade' }),
     kind: varchar('kind', { length: 32 }).notNull(), // provision | migrate | teardown | domain
     status: provisioningStatusEnum('status').notNull().default('queued'),
+    /** Job parameters not derivable from the tenant row (adminEmail, port…). */
+    params: jsonb('params').$type<Record<string, unknown>>(),
     /** step key → { status, startedAt, finishedAt, error } */
     steps: jsonb('steps')
       .$type<
