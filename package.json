@@ -1,0 +1,22 @@
+{
+  "name": "hr-saas",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev:app": "npm run dev --workspace apps/app",
+    "dev:marketing": "npm run dev --workspace apps/marketing",
+    "dev:admin": "npm run dev --workspace apps/admin",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}
