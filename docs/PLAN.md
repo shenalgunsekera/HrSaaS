@@ -8,7 +8,7 @@ before the next starts.
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Foundations: monorepo, design tokens + motion, control-plane schema, ADRs | ✅ **Complete** (2026-07-04) |
-| 1 | One reproducible tenant (IaC, one-command provision) | ⬜ Next — blocked on §14 decisions 1 & 5 (Supabase org structure, hosting target) |
+| 1 | One reproducible tenant (containerized app, one-command provision) | ✅ **Complete** (2026-07-05) |
 | 2 | Factory + control-plane console + entitlement flips | ⬜ |
 | 3 | Isolation end-to-end: dedicated DB per tenant, RLS, RBAC, tenant resolution | ⬜ |
 | 4 | Dynamic schema engine (wizard, generated forms, all feature-sheet templates) | ⬜ |
@@ -51,8 +51,35 @@ before the next starts.
 - Control plane can hold a tenant record: `packages/db/src/control-plane/schema.ts`
   (`tenants` + supporting tables); migration generation wired via drizzle-kit.
 
+## Phase 1 — what was built
+
+- **Tenant schema foundation** (`packages/db/src/tenant`): tenant_members,
+  tenant_meta, statutory reference copies, audit_log — no tenant_id columns
+  anywhere (isolation is physical). Module tables land Phase 6+.
+- **Containerized app**: Next standalone output, one `hr-app:dev` image for all
+  tenants (`docker/app.Dockerfile`); per-tenant differences are env only.
+- **Factory (local Docker driver)**: `scripts/provision-tenant.mjs` — one
+  command → dedicated Postgres container + migrations + SL statutory seeds +
+  domain record + entitlements + admin user + theme + live app container.
+  Step ledger persisted to `provisioning_runs`; re-runs skip completed steps.
+  `scripts/teardown-tenant.mjs` is the automated erasure path.
+- **/status page**: renders identity, tier, theme, dedicated db_ref, member and
+  seed counts, and the resolved module matrix — from config alone.
+
+## Phase 1 DoD verification (2026-07-05)
+
+- `acme` (L1, default brand, port 4101) and `globex` (L3, `#0D9488`, port 4102)
+  provisioned by one command each, zero manual steps.
+- Both serve HTTP 200 with correct name, tier, theme and `db_ref`; same image.
+- Physical isolation verified: each dedicated DB contains only its own admin
+  member; separate containers + volumes.
+- Idempotency verified: re-running acme's provision skipped all 10 steps and
+  reported the live instance.
+
 ## Changelog
 
+- **2026-07-05** — Phase 1 delivered: containerized app, idempotent one-command
+  tenant factory (local Docker driver), two live isolated tenants differing
+  only by config. ADR-0008/0009 accepted (user approved recommended defaults).
 - **2026-07-04** — Phase 0 delivered. Tailwind 4 adopted (ADR-0003). Open
-  decisions recorded with recommended defaults (ADR-0007) — need confirmation
-  before Phase 1 infra work.
+  decisions recorded with recommended defaults (ADR-0007).

@@ -6,6 +6,7 @@ out/
 .env
 .env.*
 !.env.example
+_secrets/
 .turbo/
 coverage/
 .DS_Store

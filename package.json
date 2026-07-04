@@ -10,7 +10,13 @@
     "packages/*",
     "services/*"
   ],
+  "dependencies": {
+    "postgres": "^3.4.5"
+  },
   "scripts": {
+    "provision": "node scripts/provision-tenant.mjs",
+    "teardown": "node scripts/teardown-tenant.mjs",
+    "docker:build:app": "docker build -f docker/app.Dockerfile -t hr-app:dev .",
     "dev:app": "npm run dev --workspace apps/app",
     "dev:marketing": "npm run dev --workspace apps/marketing",
     "dev:admin": "npm run dev --workspace apps/admin",
