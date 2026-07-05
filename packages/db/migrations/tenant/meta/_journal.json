@@ -29,6 +29,13 @@
       "when": 1783236788811,
       "tag": "0003_l1-cores",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783238746067,
+      "tag": "0004_leave-policies-settlements",
+      "breakpoints": true
     }
   ]
 }

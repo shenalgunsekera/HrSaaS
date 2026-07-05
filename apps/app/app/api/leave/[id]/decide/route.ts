@@ -30,11 +30,37 @@ export async function POST(
   }
 
   const result = await withTenantDb(async (db) => {
-    const [row] = await db<{ id: string; status: string }[]>`
-      select id, status from leave_requests where id = ${id}`;
+    const [row] = await db<
+      { id: string; status: string; employee_id: string; leave_type: string;
+        days: string; start_date: string }[]
+    >`select id, status, employee_id, leave_type, days,
+        to_char(start_date,'YYYY') as start_date
+      from leave_requests where id = ${id}`;
     if (!row) return { status: 404 as const, body: { error: 'not found' } };
     if (row.status !== 'pending') {
       return { status: 409 as const, body: { error: `already ${row.status}` } };
+    }
+
+    // Entitlement rule: entitled types cannot exceed the annual policy balance
+    // (no-pay is by definition unentitled and always allowed).
+    if (action === 'approve' && row.leave_type !== 'no-pay') {
+      const [policy] = await db<{ annual_days: string }[]>`
+        select annual_days from leave_policies where leave_type = ${row.leave_type}`;
+      const entitled = Number(policy?.annual_days ?? 0);
+      const [{ used }] = await db<[{ used: string }]>`
+        select coalesce(sum(days), 0)::text as used from leave_requests
+        where employee_id = ${row.employee_id} and leave_type = ${row.leave_type}
+          and status = 'approved'
+          and to_char(start_date,'YYYY') = ${row.start_date}`;
+      const remaining = entitled - Number(used);
+      if (Number(row.days) > remaining) {
+        return {
+          status: 409 as const,
+          body: {
+            error: `insufficient ${row.leave_type} balance: ${remaining} of ${entitled} day(s) remaining this year`,
+          },
+        };
+      }
     }
     const next = action === 'approve' ? 'approved' : 'rejected';
     await db`update leave_requests set status = ${next} where id = ${id}`;

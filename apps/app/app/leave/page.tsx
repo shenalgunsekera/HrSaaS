@@ -15,6 +15,17 @@ export default async function LeavePage() {
   const data = await withTenantDb(async (db) => {
     const employees = await db<{ employee_number: string; full_name: string }[]>`
       select employee_number, full_name from employees where status='active' order by employee_number`;
+    const balances = await db<
+      { employee_number: string; full_name: string; leave_type: string; entitled: string; used: string }[]
+    >`select e.employee_number, e.full_name, p.leave_type, p.annual_days as entitled,
+        coalesce(sum(l.days) filter (where l.status = 'approved'
+          and to_char(l.start_date,'YYYY') = to_char(now(),'YYYY')), 0) as used
+      from employees e
+      cross join leave_policies p
+      left join leave_requests l on l.employee_id = e.id and l.leave_type = p.leave_type
+      where e.status = 'active' and p.annual_days > 0 and p.leave_type in ('annual','casual','medical')
+      group by e.employee_number, e.full_name, p.leave_type, p.annual_days
+      order by e.employee_number, p.leave_type`;
     const requests = await db<
       { id: string; employee_number: string; full_name: string; leave_type: string;
         start_date: string; end_date: string; days: string; status: string; reason: string | null }[]
@@ -23,7 +34,7 @@ export default async function LeavePage() {
         to_char(l.end_date,'YYYY-MM-DD') as end_date, l.days, l.status, l.reason
       from leave_requests l join employees e on e.id = l.employee_id
       order by l.created_at desc limit 100`;
-    return { employees, requests };
+    return { employees, requests, balances };
   });
   const themeVars = (ctx.theme?.colors ?? {}) as React.CSSProperties;
 
@@ -70,6 +81,34 @@ export default async function LeavePage() {
             Request leave
           </button>
         </form>
+
+        {data!.balances.length > 0 && (
+          <div className="border border-line overflow-x-auto mb-10">
+            <table className="w-full font-body text-sm">
+              <thead>
+                <tr className="border-b border-line bg-surface text-left">
+                  {['Employee', 'Type', 'Entitled', 'Used (this year)', 'Remaining'].map((h) => (
+                    <th key={h} className="px-5 py-3 font-body text-xs uppercase tracking-widest text-mute-2">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data!.balances.map((b) => {
+                  const remaining = Number(b.entitled) - Number(b.used);
+                  return (
+                    <tr key={`${b.employee_number}-${b.leave_type}`} className="border-b border-line last:border-b-0 hover:bg-brand-50 transition-colors">
+                      <td className="px-5 py-2.5 font-semibold">{b.full_name} <span className="text-mute-3">{b.employee_number}</span></td>
+                      <td className="px-5 py-2.5">{b.leave_type}</td>
+                      <td className="px-5 py-2.5">{Number(b.entitled)}</td>
+                      <td className="px-5 py-2.5">{Number(b.used)}</td>
+                      <td className={`px-5 py-2.5 font-semibold ${remaining <= 0 ? 'text-red-600' : 'text-brand'}`}>{remaining}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <div className="space-y-3">
           {data!.requests.length === 0 && (
