@@ -11,7 +11,7 @@ before the next starts.
 | 1 | One reproducible tenant (containerized app, one-command provision) | ✅ **Complete** (2026-07-05) |
 | 2 | Factory + control-plane console + entitlement flips | ✅ **Complete** (2026-07-05) |
 | 3 | Isolation end-to-end: dedicated DB per tenant, RLS, RBAC, tenant resolution | ✅ **Complete** (2026-07-05) |
-| 4 | Dynamic schema engine (wizard, generated forms, all feature-sheet templates) | ⬜ |
+| 4 | Dynamic schema engine (wizard, generated forms, templates) | ✅ **Complete** (2026-07-05) — remaining module templates transcribe in Phase 6+ as their cores land |
 | 5 | Marketing site + consultation → provisioning handoff | ⬜ |
 | 6 | L1 modules (incl. SL statutory payroll + gratuity, Leave↔Attendance↔Payroll coupling) | ⬜ |
 | 7 | L2 & L3 modules (+ disciplinary/grievance, multi-entity payroll) | ⬜ |
@@ -123,6 +123,32 @@ before the next starts.
   member data intact throughout.
 - **Fleet tooling**: `npm run redeploy` (one image → all tenants),
   `npm run migrate:tenants`. See ADR-0010.
+
+## Phase 4 — what was built
+
+- **Storage** (tenant migration 0002): versioned immutable `object_definitions`
+  (JSONB definition per version), `custom_records` (JSONB + GIN index, records
+  pinned to their definition version), RLS enabled — per ADR-0006, never EAV.
+- **Runtime** (`@hr/schema-engine`): `validateRecord` (all rules derive from
+  field metadata), `visibleFields`/`editableFields` (field-level RBAC binding);
+  5 new unit tests (20 total green).
+- **Wizard + generated views** (`apps/app`): `/objects` (create blank or from
+  the Employee Master feature-sheet template, module list limited to entitled
+  modules), `/objects/[key]` builder (add/remove fields → new published
+  version), `/objects/[key]/records` (form + table generated from metadata,
+  role-aware). APIs mirror the UI.
+- **Guardrails verified live**: non-entitled module refused; protected core
+  keys (payslip, payroll-run, …) refused; unknown fields rejected; every
+  definition change audit-logged.
+
+## Phase 4 DoD verification (2026-07-05)
+
+On live tenant acme with no deploy: object created (v1) → 3 fields added
+(v2–v4) → valid record 201; bad payload 422 with per-field issues; employee
+role 403 (RBAC gate); field removed (v5) and instantly gone from the
+generated form/table. Template adoption on globex instantiated the full
+Employee Master A–K field set. Role-based field visibility verified in
+generated views (`?role=` simulation until per-tenant auth).
 
 ## Changelog
 
