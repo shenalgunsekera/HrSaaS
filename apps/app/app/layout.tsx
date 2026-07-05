@@ -17,6 +17,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   const items: NavItem[] = [];
   if (ctx) {
+    items.push({ href: '/', label: 'Overview' });
     if (canUseModule(ctx.entitlements, 'employee-master')) items.push({ href: '/employees', label: 'Employees' });
     if (canUseModule(ctx.entitlements, 'attendance')) items.push({ href: '/attendance', label: 'Attendance' });
     if (canUseModule(ctx.entitlements, 'leave')) items.push({ href: '/leave', label: 'Leave' });
@@ -33,32 +34,43 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={(ctx?.theme?.colors ?? {}) as React.CSSProperties}
       >
         <TenantThemeStyle theme={ctx?.theme?.colors ?? null} />
-        {ctx && (
-          <header className="border-b border-line print:hidden">
-            <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-4 flex flex-wrap items-center gap-6">
-              <Link href="/" className="flex items-center gap-3">
+        {ctx ? (
+          <div className="md:flex min-h-svh">
+            {/* sidebar */}
+            <aside className="md:w-60 md:shrink-0 md:min-h-svh md:sticky md:top-0 md:h-svh border-b md:border-b-0 md:border-r border-line print:hidden flex md:flex-col gap-4 md:gap-0 items-center md:items-stretch px-4 md:px-0 py-3 md:py-0">
+              <Link href="/" className="flex items-center gap-3 md:px-5 md:py-6 md:border-b md:border-line">
                 {ctx.theme?.logoUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={ctx.theme.logoUrl}
                     alt=""
-                    className="h-8 w-8 object-contain border border-line bg-ink p-0.5"
+                    className="h-9 w-9 object-contain border border-line bg-ink p-0.5"
                   />
                 )}
-                <span className="font-display text-xl tracking-wide text-chalk">
-                  {displayName?.toUpperCase()}
-                </span>
-                <span className="font-body text-[10px] tracking-widest2 uppercase text-mute-3 border border-line px-2 py-0.5">
-                  {ctx.tier}
+                <span className="min-w-0">
+                  <span className="block font-display text-lg leading-tight tracking-wide text-chalk truncate">
+                    {displayName?.toUpperCase()}
+                  </span>
+                  <span className="font-body text-[10px] tracking-widest2 uppercase text-mute-3">
+                    Tier {ctx.tier}
+                  </span>
                 </span>
               </Link>
-              <div className="ml-auto">
+              <div className="md:py-4 md:flex-1 min-w-0">
                 <TenantNav items={items} />
               </div>
-            </div>
-          </header>
+              <p className="hidden md:block px-5 py-4 border-t border-line font-body text-[10px] text-mute-3 leading-relaxed">
+                Dedicated database
+                <br />
+                <span className="text-mute-2">{ctx.dbRef}</span>
+              </p>
+            </aside>
+            {/* content */}
+            <div className="flex-1 min-w-0">{children}</div>
+          </div>
+        ) : (
+          children
         )}
-        {children}
       </body>
     </html>
   );

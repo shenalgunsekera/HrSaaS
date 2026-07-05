@@ -7,11 +7,11 @@ export interface NavItem {
   label: string;
 }
 
-/** Top navigation — items arrive already entitlement-filtered from the server. */
+/** Sidebar navigation — items arrive already entitlement-filtered from the server. */
 export function TenantNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-wrap items-center gap-1 overflow-x-auto">
+    <nav className="flex md:flex-col gap-0.5 overflow-x-auto md:overflow-visible">
       {items.map((item) => {
         const active =
           item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
@@ -19,10 +19,10 @@ export function TenantNav({ items }: { items: NavItem[] }) {
           <Link
             key={item.href}
             href={item.href}
-            className={`px-4 py-2 font-body text-xs tracking-widest uppercase transition-colors whitespace-nowrap ${
+            className={`px-4 py-2.5 font-body text-xs tracking-widest uppercase transition-colors whitespace-nowrap border-l-2 ${
               active
-                ? 'text-brand border-b-2 border-brand'
-                : 'text-mute-2 hover:text-brand border-b-2 border-transparent'
+                ? 'text-brand border-brand bg-brand-50'
+                : 'text-mute-2 border-transparent hover:text-brand hover:border-line'
             }`}
           >
             {item.label}
