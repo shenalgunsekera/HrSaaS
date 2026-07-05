@@ -129,7 +129,7 @@ export async function executeRun(cp, cpInfo, runId, log = console.log) {
         if (count === 0) {
           await tdb`insert into statutory_rates (kind, rate_percent, params, effective_from, source)
             values (${r.kind}, ${r.rate}, ${r.params}, '2026-01-01',
-                    'UNVERIFIED SEED — confirm against authoritative source before payroll (ADR-0007 §7)')`;
+                    'VERIFIED 2026-07-05 — docs/STATUTORY.md (EPF Act 15/1958, ETF Act 46/1980, Gratuity Act 12/1983)')`;
         }
       }
       const [{ count: tt }] = await tdb`select count(*)::int as count from tax_tables where name = 'APIT'`;
@@ -146,7 +146,7 @@ export async function executeRun(cp, cpInfo, runId, log = console.log) {
             ])},
             ${tdb.json({ personalReliefMonthly: 150000 })},
             '2026-01-01',
-            'UNVERIFIED SEED — confirm against IRD before payroll (ADR-0007 §7)')`;
+            'VERIFIED 2026-07-05 — IRD APIT tables Y/A 2025/26 (docs/STATUTORY.md)')`;
       }
       await tdb`insert into holiday_calendars (country, year, holidays)
         values ('LK', 2026, ${tdb.json([

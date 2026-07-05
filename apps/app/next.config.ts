@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     '@hr/design-system',
     '@hr/entitlements',
+    '@hr/payroll',
     '@hr/rbac',
     '@hr/schema-engine',
     '@hr/tenant-context',

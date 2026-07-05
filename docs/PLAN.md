@@ -13,7 +13,7 @@ before the next starts.
 | 3 | Isolation end-to-end: dedicated DB per tenant, RLS, RBAC, tenant resolution | ✅ **Complete** (2026-07-05) |
 | 4 | Dynamic schema engine (wizard, generated forms, templates) | ✅ **Complete** (2026-07-05) — remaining module templates transcribe in Phase 6+ as their cores land |
 | 5 | Marketing site + consultation → provisioning handoff | ✅ **Complete** (2026-07-05) |
-| 6 | L1 modules (incl. SL statutory payroll + gratuity, Leave↔Attendance↔Payroll coupling) | ⬜ |
+| 6 | L1 modules (incl. SL statutory payroll + gratuity, Leave↔Attendance↔Payroll coupling) | 🟨 **Statutory core complete** (2026-07-05) — attendance/leave UIs, payslip PDFs, bank files, remaining L1 modules + dashboards continue |
 | 7 | L2 & L3 modules (+ disciplinary/grievance, multi-entity payroll) | ⬜ |
 | 8 | L4 Analytics, then L5 AI & agent orchestration with governance | ⬜ |
 | 9 | Hardening: migration waves, observability, backups/restores, DR, cost/autosleep | ⬜ |
@@ -173,6 +173,33 @@ instance live at :4303 with correct name, tier, brand, and
 `nadeesha@hemastextiles.lk` as tenant-admin (zero re-keying). Incidentally
 verified multi-worker safety: two workers were running and FOR UPDATE SKIP
 LOCKED gave the run to exactly one.
+
+## Phase 6 (statutory core) — what was built
+
+- **Statutory verification first** (docs/STATUTORY.md): EPF 8/12, ETF 3,
+  APIT Y/A 2025/26 (relief 150k/mo; 6/18/24/30/36%), Gratuity Act 12/1983 —
+  sources recorded; seeds flipped UNVERIFIED → VERIFIED fleet-wide.
+- **Typed L1 cores** (tenant migration 0003): employees (+`custom` JSONB for
+  the schema engine), attendance_records, leave_requests, payroll_runs,
+  payslips — fixed schema, RLS enabled, check constraints.
+- **`@hr/payroll`** — pure engine, rates always injected from tenant reference
+  rows: progressive monthly APIT, EPF/ETF, no-pay (divisor 30), gratuity
+  accrual. `deriveNoPayDays` is the ONE Leave↔Attendance↔Payroll surface:
+  approved no-pay leave + uncovered absences (half-days 0.5), never
+  double-counted. 13 hand-checked tests (33 total green).
+- **App**: `/employees` (typed intake + list), `/payroll` (run per period,
+  dashboard strip: gross/net/statutory liability, payslip register),
+  `POST /api/payroll/run` (draft re-run allowed; approved/locked immutable;
+  entitlement-gated; rates resolved per period).
+
+## Phase 6 core DoD verification (2026-07-05, tenant hemas)
+
+Two employees; June 2026 inputs: EMP-001 one uncovered absence + one approved
+no-pay day; EMP-002 absence covered by approved annual leave. Run produced
+exact hand-checked figures: EMP-001 gross 205,333.33 (2 no-pay days →
+14,666.67), EPF 16,426.67, APIT 3,320.00, net 185,586.66; EMP-002 zero no-pay
+(leave-covered), APIT 0 (below relief), net 110,400. Draft re-run replaced
+payslips correctly.
 
 ## Changelog
 

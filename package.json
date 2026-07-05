@@ -18,7 +18,7 @@
     "worker": "node services/provisioner/src/worker.mjs",
     "migrate:tenants": "node scripts/migrate-tenants.mjs",
     "redeploy": "node scripts/redeploy-tenant.mjs",
-    "test:unit": "tsx --test packages/rbac/src/rbac.test.ts packages/entitlements/src/entitlements.test.ts packages/schema-engine/src/validate.test.ts",
+    "test:unit": "tsx --test packages/rbac/src/rbac.test.ts packages/entitlements/src/entitlements.test.ts packages/schema-engine/src/validate.test.ts packages/payroll/src/payroll.test.ts",
     "test:isolation": "tsx scripts/test-isolation.mts",
     "teardown": "node scripts/teardown-tenant.mjs",
     "docker:build:app": "docker build -f docker/app.Dockerfile -t hr-app:dev .",
