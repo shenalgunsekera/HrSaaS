@@ -106,6 +106,18 @@ describe('payslip (hand-checked)', () => {
     assert.equal(p.net, 185586.66); // 205,333.33 - 16,426.67 - 3,320
     assert.equal(p.employerCost, 236133.33);
   });
+  it('post-tax deductions reduce net only, never the statutory base', () => {
+    const base = computePayslip({ basic: 200000, fixedAllowances: {}, noPayDays: 0, rates: RATES, tax: TAX });
+    const withAdvance = computePayslip({
+      basic: 200000, fixedAllowances: {}, noPayDays: 0, rates: RATES, tax: TAX,
+      postTaxDeductions: { 'advance-recovery': 20000 },
+    });
+    assert.equal(withAdvance.epfEmployee, base.epfEmployee, 'EPF base unchanged');
+    assert.equal(withAdvance.apit, base.apit, 'APIT base unchanged');
+    assert.equal(withAdvance.net, base.net - 20000);
+    assert.equal(withAdvance.postTaxDeductions, 20000);
+  });
+
   it('below relief pays no APIT but full EPF', () => {
     const p = computePayslip({ basic: 120000, fixedAllowances: {}, noPayDays: 0, rates: RATES, tax: TAX });
     assert.equal(p.apit, 0);

@@ -82,12 +82,30 @@ export async function POST(request: NextRequest) {
           and end_date >= ${period + '-01'}`;
 
       const noPayDays = deriveNoPayDays(period, attendance, leaves);
+
+      // Financial wellness coupling: recover active advance/loan installments
+      // post-tax (never touching the statutory base), capped at outstanding.
+      const activeAdvances = await db<
+        { id: string; kind: string; monthly_installment: string; outstanding: string }[]
+      >`select id, kind, monthly_installment, outstanding from advances
+        where employee_id = ${emp.id} and status = 'active' and outstanding > 0`;
+      const postTaxDeductions: Record<string, number> = {};
+      const recoveries: Array<{ id: string; amount: number }> = [];
+      for (const a of activeAdvances) {
+        const amount = Math.min(Number(a.monthly_installment), Number(a.outstanding));
+        if (amount <= 0) continue;
+        postTaxDeductions[`${a.kind}-recovery`] =
+          (postTaxDeductions[`${a.kind}-recovery`] ?? 0) + amount;
+        recoveries.push({ id: a.id, amount });
+      }
+
       const slip = computePayslip({
         basic: Number(emp.basic_salary),
         fixedAllowances: emp.fixed_allowances ?? {},
         noPayDays,
         rates,
         tax: { brackets: taxRow.brackets },
+        postTaxDeductions,
       });
 
       await db`insert into payslips
@@ -96,7 +114,10 @@ export async function POST(request: NextRequest) {
         values (${run!.id}, ${emp.id}, ${slip.basic}, ${db.json(emp.fixed_allowances ?? {})},
                 ${slip.gross}, ${noPayDays}, ${slip.noPayDeduction},
                 ${slip.epfEmployee}, ${slip.epfEmployer}, ${slip.etfEmployer},
-                ${slip.apit}, ${slip.net}, ${db.json({ employerCost: slip.employerCost } as never)})`;
+                ${slip.apit}, ${slip.net},
+                ${db.json({ employerCost: slip.employerCost, postTaxDeductions, recoveries } as never)})`;
+      // NOTE: outstanding balances are reduced at run APPROVAL (recovery is
+      // final only then) — so draft re-runs never double-deduct.
       totalGross += slip.gross;
       totalNet += slip.net;
       totalStatutory += slip.epfEmployee + slip.epfEmployer + slip.etfEmployer + slip.apit;

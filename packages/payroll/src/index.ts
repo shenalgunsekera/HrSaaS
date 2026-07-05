@@ -91,6 +91,9 @@ export interface PayslipInput {
   tax: TaxTable;
   /** Divisor for a day's pay — SL convention 30. */
   noPayDivisor?: number;
+  /** Post-tax deductions (advance/loan recovery, welfare…): name → amount.
+   *  Deducted from net only — never from the EPF/ETF/APIT base. */
+  postTaxDeductions?: Record<string, number>;
 }
 
 export interface PayslipResult {
@@ -104,6 +107,7 @@ export interface PayslipResult {
   apit: number;
   totalDeductions: number;
   net: number;
+  postTaxDeductions: number;
   employerCost: number;
 }
 
@@ -124,7 +128,10 @@ export function computePayslip(input: PayslipInput): PayslipResult {
   const etfEmployer = r2((earnings * input.rates.etfEmployerPct) / 100);
   const apit = computeApitMonthly(earnings, input.tax);
 
-  const totalDeductions = r2(epfEmployee + apit);
+  const postTax = r2(
+    Object.values(input.postTaxDeductions ?? {}).reduce((a, b) => a + b, 0),
+  );
+  const totalDeductions = r2(epfEmployee + apit + postTax);
   return {
     basic: input.basic,
     allowancesTotal,
@@ -136,6 +143,7 @@ export function computePayslip(input: PayslipInput): PayslipResult {
     apit,
     totalDeductions,
     net: r2(earnings - totalDeductions),
+    postTaxDeductions: postTax,
     employerCost: r2(earnings + epfEmployer + etfEmployer),
   };
 }
