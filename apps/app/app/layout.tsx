@@ -23,6 +23,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     if (canUseModule(ctx.entitlements, 'attendance')) items.push({ href: '/attendance', label: 'Attendance' });
     if (canUseModule(ctx.entitlements, 'leave')) items.push({ href: '/leave', label: 'Leave' });
     if (canUseModule(ctx.entitlements, 'payroll')) items.push({ href: '/payroll', label: 'Payroll' });
+    if (canUseModule(ctx.entitlements, 'recruitment')) items.push({ href: '/recruitment', label: 'Recruitment' });
     if (canUseModule(ctx.entitlements, 'contractor-gig')) items.push({ href: '/contractors', label: 'Contractors' });
     if (canUseModule(ctx.entitlements, 'financial-wellness')) items.push({ href: '/wellness', label: 'Wellness' });
     if (canUseModule(ctx.entitlements, 'data-privacy')) items.push({ href: '/privacy', label: 'Privacy' });

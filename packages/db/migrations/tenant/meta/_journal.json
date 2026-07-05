@@ -71,6 +71,13 @@
       "when": 1783255386674,
       "tag": "0009_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1783255885098,
+      "tag": "0010_recruitment",
+      "breakpoints": true
     }
   ]
 }
