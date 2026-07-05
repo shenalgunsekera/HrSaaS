@@ -1,6 +1,9 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +11,10 @@ const input =
   'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
 
 /** Contractor & Gig Workforce (L1): register + expiry compliance strip. */
-export default async function ContractorsPage() {
+export default async function ContractorsPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   const data = await withTenantDb(async (db) => {
@@ -22,7 +28,12 @@ export default async function ContractorsPage() {
         to_char(contract_end,'YYYY-MM-DD') as contract_end, status,
         (status = 'active' and contract_end is not null
          and contract_end <= current_date + interval '30 days') as expiring
-      from contractors order by contract_end nulls last, contractor_number`;
+      from contractors
+      where (${paging.q} = '' or full_name ilike ${paging.like}
+             or contractor_number ilike ${paging.like} or agency ilike ${paging.like}
+             or contractor_type ilike ${paging.like})
+      order by contract_end nulls last, contractor_number
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     const [stats] = await db<[{ active: string; expiring: string; agencies: string }]>`
       select
         (select count(*) from contractors where status = 'active')::text as active,
@@ -32,6 +43,7 @@ export default async function ContractorsPage() {
     return { rows, stats };
   });
 
+  const { rows: ctrRows, hasMore } = pageSlice(data!.rows);
   return (
     <main className="relative min-h-svh">
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
@@ -89,6 +101,7 @@ export default async function ContractorsPage() {
           </button>
         </form>
 
+        <TableControls basePath="/contractors" q={paging.q} page={paging.page} hasMore={hasMore} count={ctrRows.length} placeholder="Search name, agency, type…" />
         <div className="rounded-lg border border-line overflow-x-auto">
           <table className="w-full font-body text-sm">
             <thead>
@@ -99,10 +112,10 @@ export default async function ContractorsPage() {
               </tr>
             </thead>
             <tbody>
-              {data!.rows.length === 0 && (
+              {ctrRows.length === 0 && (
                 <tr><td colSpan={8} className="px-5 py-8 font-heading italic text-mute-3">No contractors yet.</td></tr>
               )}
-              {data!.rows.map((c) => (
+              {ctrRows.map((c) => (
                 <tr key={c.contractor_number} className="border-b border-line last:border-b-0 hover:bg-brand-50 transition-colors">
                   <td className="px-5 py-3 text-mute-2">{c.contractor_number}</td>
                   <td className="px-5 py-3 font-semibold">{c.full_name}</td>

@@ -2,6 +2,9 @@ import { canUseModule } from '@hr/entitlements';
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +12,10 @@ const input =
   'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
 
 /** Training (L2): catalogue, enrollments, certifications, mandatory compliance. */
-export default async function TrainingPage() {
+export default async function TrainingPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   if (!canUseModule(ctx.entitlements, 'training')) {
@@ -40,7 +46,10 @@ export default async function TrainingPage() {
       from enrollments en
       join courses c on c.id = en.course_id
       join employees e on e.id = en.employee_id
-      order by en.completed_at desc nulls first`;
+      where (${paging.q} = '' or e.full_name ilike ${paging.like}
+             or c.title ilike ${paging.like} or en.status ilike ${paging.like})
+      order by en.completed_at desc nulls first
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     const [compliance] = await db<[{ pct: string | null }]>`
       select round(100.0 * count(*) filter (where en.status = 'completed')
              / nullif(count(*), 0), 0)::text as pct
@@ -51,6 +60,7 @@ export default async function TrainingPage() {
     return { employees, courses, enrollments, compliance };
   });
 
+  const { rows: enRows, hasMore } = pageSlice(data!.enrollments);
   return (
     <main className="relative min-h-svh">
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
@@ -120,6 +130,7 @@ export default async function TrainingPage() {
           </form>
         </div>
 
+        <TableControls basePath="/training" q={paging.q} page={paging.page} hasMore={hasMore} count={enRows.length} placeholder="Search employee, course, status…" />
         <div className="rounded-lg border border-line overflow-x-auto">
           <table className="w-full font-body text-sm">
             <thead>
@@ -130,10 +141,10 @@ export default async function TrainingPage() {
               </tr>
             </thead>
             <tbody>
-              {data!.enrollments.length === 0 && (
+              {enRows.length === 0 && (
                 <tr><td colSpan={6} className="px-5 py-6 font-heading italic text-mute-3">No enrollments yet.</td></tr>
               )}
-              {data!.enrollments.map((en) => (
+              {enRows.map((en) => (
                 <tr key={en.id} className="border-b border-line last:border-b-0 hover:bg-brand-50 transition-colors">
                   <td className="px-5 py-3 font-semibold">{en.full_name} <span className="text-mute-3">{en.employee_number}</span></td>
                   <td className="px-5 py-3">{en.title}</td>

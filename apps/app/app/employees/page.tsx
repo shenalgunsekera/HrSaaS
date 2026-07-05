@@ -1,6 +1,8 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +10,10 @@ const input =
   'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
 
 /** Employee Master (L1) — typed core list + intake. */
-export default async function EmployeesPage() {
+export default async function EmployeesPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   const settlements =
@@ -21,15 +26,20 @@ export default async function EmployeesPage() {
         from final_settlements s join employees e on e.id = s.employee_id
         order by s.created_at desc`,
     )) ?? [];
-  const employees =
+  const { rows: employees, hasMore } = pageSlice(
     (await withTenantDb((db) =>
       db<
         { employee_number: string; full_name: string; department: string | null;
           designation: string | null; basic_salary: string; date_joined: string; status: string }[]
       >`select employee_number, full_name, department, designation, basic_salary,
           to_char(date_joined,'YYYY-MM-DD') as date_joined, status
-        from employees order by employee_number`,
-    )) ?? [];
+        from employees
+        where (${paging.q} = '' or full_name ilike ${paging.like}
+               or employee_number ilike ${paging.like} or department ilike ${paging.like})
+        order by employee_number
+        limit ${paging.pageSize + 1} offset ${paging.offset}`,
+    )) ?? [],
+  );
   const themeVars = (ctx.theme?.colors ?? {}) as React.CSSProperties;
 
   return (
@@ -69,6 +79,7 @@ export default async function EmployeesPage() {
           </button>
         </form>
 
+        <TableControls basePath="/employees" q={paging.q} page={paging.page} hasMore={hasMore} count={employees.length} placeholder="Search name, number, department…" />
         <div className="rounded-lg border border-line overflow-x-auto">
           <table className="w-full font-body text-sm">
             <thead>

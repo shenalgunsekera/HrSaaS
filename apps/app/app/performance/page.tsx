@@ -2,6 +2,9 @@ import { canUseModule } from '@hr/entitlements';
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +12,10 @@ const input =
   'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
 
 /** Performance (L2): goals with progress + review cycles with weighted rating. */
-export default async function PerformancePage() {
+export default async function PerformancePage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   if (!canUseModule(ctx.entitlements, 'performance')) {
@@ -31,7 +37,10 @@ export default async function PerformancePage() {
     >`select g.id, e.employee_number, e.full_name, g.title, g.weight, g.progress, g.status,
         to_char(g.target_date,'YYYY-MM-DD') as target_date
       from goals g join employees e on e.id = g.employee_id
-      order by e.employee_number, g.created_at`;
+      where (${paging.q} = '' or e.full_name ilike ${paging.like}
+             or g.title ilike ${paging.like} or g.status ilike ${paging.like})
+      order by e.employee_number, g.created_at
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     const reviews = await db<
       { employee_number: string; full_name: string; period: string; self_rating: number | null;
         manager_rating: number | null; final_rating: string | null; status: string }[]
@@ -42,6 +51,7 @@ export default async function PerformancePage() {
     return { employees, goals, reviews };
   });
 
+  const { rows: goalRows, hasMore } = pageSlice(data!.goals);
   return (
     <main className="relative min-h-svh">
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
@@ -113,6 +123,7 @@ export default async function PerformancePage() {
         </div>
 
         <h2 className="text-xl font-bold tracking-tight text-chalk mb-3">Goals</h2>
+        <TableControls basePath="/performance" q={paging.q} page={paging.page} hasMore={hasMore} count={goalRows.length} placeholder="Search employee, goal, status…" />
         <div className="rounded-lg border border-line overflow-x-auto mb-8">
           <table className="w-full font-body text-sm">
             <thead>
@@ -123,10 +134,10 @@ export default async function PerformancePage() {
               </tr>
             </thead>
             <tbody>
-              {data!.goals.length === 0 && (
+              {goalRows.length === 0 && (
                 <tr><td colSpan={6} className="px-5 py-6 font-heading italic text-mute-3">No goals yet.</td></tr>
               )}
-              {data!.goals.map((g) => (
+              {goalRows.map((g) => (
                 <tr key={g.id} className="border-b border-line last:border-b-0 hover:bg-brand-50 transition-colors">
                   <td className="px-5 py-3 font-semibold">{g.full_name} <span className="text-mute-3">{g.employee_number}</span></td>
                   <td className="px-5 py-3">{g.title}</td>

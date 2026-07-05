@@ -1,6 +1,9 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +13,10 @@ const input =
 const LEAVE_TYPES = ['annual', 'casual', 'medical', 'no-pay', 'maternity', 'paternity', 'lieu', 'study', 'special', 'compassionate'];
 
 /** Leave (L1): request → manager/HR decision. Approved no-pay feeds payroll. */
-export default async function LeavePage() {
+export default async function LeavePage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   const data = await withTenantDb(async (db) => {
@@ -34,9 +40,14 @@ export default async function LeavePage() {
         to_char(l.start_date,'YYYY-MM-DD') as start_date,
         to_char(l.end_date,'YYYY-MM-DD') as end_date, l.days, l.status, l.reason
       from leave_requests l join employees e on e.id = l.employee_id
-      order by l.created_at desc limit 100`;
+      where (${paging.q} = '' or e.full_name ilike ${paging.like}
+             or e.employee_number ilike ${paging.like}
+             or l.leave_type ilike ${paging.like} or l.status ilike ${paging.like})
+      order by l.created_at desc
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     return { employees, requests, balances };
   });
+  const { rows: reqRows, hasMore } = pageSlice(data!.requests);
   const themeVars = (ctx.theme?.colors ?? {}) as React.CSSProperties;
 
   return (
@@ -112,11 +123,12 @@ export default async function LeavePage() {
           </div>
         )}
 
+        <TableControls basePath="/leave" q={paging.q} page={paging.page} hasMore={hasMore} count={reqRows.length} placeholder="Search name, type, status…" />
         <div className="space-y-3">
-          {data!.requests.length === 0 && (
+          {reqRows.length === 0 && (
             <p className="font-heading italic text-mute-3">No leave requests yet.</p>
           )}
-          {data!.requests.map((r) => (
+          {reqRows.map((r) => (
             <div key={r.id} className="rounded-lg border border-line bg-ink px-5 py-3.5 flex flex-wrap items-center gap-5 hover:bg-brand-50 transition-colors">
               <span className="font-body font-semibold text-sm min-w-44">
                 {r.full_name} <span className="text-mute-3">{r.employee_number}</span>

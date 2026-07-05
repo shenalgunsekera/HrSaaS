@@ -1,6 +1,9 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +12,10 @@ const input =
 const fmt = (v: string | number) => Number(v).toLocaleString(undefined, { minimumFractionDigits: 2 });
 
 /** Financial Wellness (L1): advances & loans, recovered through payroll. */
-export default async function WellnessPage() {
+export default async function WellnessPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   const data = await withTenantDb(async (db) => {
@@ -22,7 +28,11 @@ export default async function WellnessPage() {
     >`select a.id, e.employee_number, e.full_name, a.kind, a.principal,
         a.monthly_installment, a.outstanding, a.status, a.reason
       from advances a join employees e on e.id = a.employee_id
-      order by a.requested_at desc limit 100`;
+      where (${paging.q} = '' or e.full_name ilike ${paging.like}
+             or e.employee_number ilike ${paging.like}
+             or a.kind ilike ${paging.like} or a.status ilike ${paging.like})
+      order by a.requested_at desc
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     const [stats] = await db<[{ outstanding: string; active: string; pending: string }]>`
       select
         coalesce(sum(outstanding) filter (where status = 'active'), 0)::text as outstanding,
@@ -32,6 +42,7 @@ export default async function WellnessPage() {
     return { employees, advances, stats };
   });
 
+  const { rows: advRows, hasMore } = pageSlice(data!.advances);
   return (
     <main className="relative min-h-svh">
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
@@ -90,9 +101,10 @@ export default async function WellnessPage() {
           </p>
         </form>
 
+        <TableControls basePath="/wellness" q={paging.q} page={paging.page} hasMore={hasMore} count={advRows.length} placeholder="Search name, kind, status…" />
         <div className="space-y-3">
-          {data!.advances.length === 0 && <p className="font-heading italic text-mute-3">No advances or loans yet.</p>}
-          {data!.advances.map((a) => (
+          {advRows.length === 0 && <p className="font-heading italic text-mute-3">No advances or loans yet.</p>}
+          {advRows.map((a) => (
             <div key={a.id} className="rounded-lg border border-line bg-ink px-5 py-3.5 flex flex-wrap items-center gap-5 hover:bg-brand-50 transition-colors">
               <span className="font-body font-semibold text-sm min-w-44">{a.full_name} <span className="text-mute-3">{a.employee_number}</span></span>
               <span className="font-body text-xs uppercase tracking-wider px-3 py-1 border border-line text-mute-1">{a.kind}</span>

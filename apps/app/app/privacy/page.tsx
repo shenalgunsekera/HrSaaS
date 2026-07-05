@@ -1,6 +1,9 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +12,10 @@ const input =
 const PURPOSES = ['hr-administration', 'payroll-processing', 'statutory-reporting', 'communications', 'analytics'];
 
 /** Data Privacy & Consent (L1, PDPA): consent register + DSR queue + dashboard. */
-export default async function PrivacyPage() {
+export default async function PrivacyPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   const data = await withTenantDb(async (db) => {
@@ -31,7 +37,10 @@ export default async function PrivacyPage() {
         (d.status = 'open' and d.due_at < now()) as overdue,
         to_char(d.resolved_at,'YYYY-MM-DD') as resolved_at
       from data_subject_requests d join employees e on e.id = d.employee_id
-      order by d.created_at desc limit 100`;
+      where (${paging.q} = '' or e.full_name ilike ${paging.like}
+             or d.kind ilike ${paging.like} or d.status ilike ${paging.like})
+      order by d.created_at desc
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     const [stats] = await db<
       [{ active_consents: string; withdrawn: string; open_dsrs: string; overdue_dsrs: string }]
     >`select
@@ -41,6 +50,7 @@ export default async function PrivacyPage() {
         (select count(*) from data_subject_requests where status = 'open' and due_at < now())::text as overdue_dsrs`;
     return { employees, consents, dsrs, stats };
   });
+  const { rows: dsrRows, hasMore } = pageSlice(data!.dsrs);
   const themeVars = (ctx.theme?.colors ?? {}) as React.CSSProperties;
 
   return (
@@ -122,9 +132,10 @@ export default async function PrivacyPage() {
         </div>
 
         <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-3">Data-subject requests</p>
+        <TableControls basePath="/privacy" q={paging.q} page={paging.page} hasMore={hasMore} count={dsrRows.length} placeholder="Search name, kind, status…" />
         <div className="space-y-3 mb-10">
-          {data!.dsrs.length === 0 && <p className="font-heading italic text-mute-3">None filed.</p>}
-          {data!.dsrs.map((d) => (
+          {dsrRows.length === 0 && <p className="font-heading italic text-mute-3">None filed.</p>}
+          {dsrRows.map((d) => (
             <div key={d.id} className="rounded-lg border border-line bg-ink px-5 py-3.5 flex flex-wrap items-center gap-5 hover:bg-brand-50 transition-colors">
               <span className="font-body font-semibold text-sm min-w-44">{d.full_name} <span className="text-mute-3">{d.employee_number}</span></span>
               <span className="font-body text-xs uppercase tracking-wider px-3 py-1 border border-line text-mute-1">{d.kind}</span>

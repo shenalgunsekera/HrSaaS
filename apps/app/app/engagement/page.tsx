@@ -2,6 +2,9 @@ import { canUseModule } from '@hr/entitlements';
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +25,10 @@ const enps = (s: SurveyRow) =>
   s.responses === 0 ? null : Math.round(((s.promoters - s.detractors) / s.responses) * 100);
 
 /** Engagement (L2): pulse surveys + eNPS + participation. */
-export default async function EngagementPage() {
+export default async function EngagementPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   if (!canUseModule(ctx.entitlements, 'experience-engagement')) {
@@ -42,13 +48,16 @@ export default async function EngagementPage() {
         count(r.id) filter (where r.score >= 9)::int as promoters,
         count(r.id) filter (where r.score <= 6)::int as detractors
       from surveys s left join survey_responses r on r.survey_id = s.id
-      group by s.id order by s.created_at desc`;
+      where (${paging.q} = '' or s.question ilike ${paging.like})
+      group by s.id order by s.created_at desc
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     const [{ headcount }] = await db<[{ headcount: number }]>`
       select count(*)::int as headcount from employees where status = 'active'`;
     return { surveys, headcount };
   });
 
-  const latest = data!.surveys[0];
+  const { rows: surveyRows, hasMore } = pageSlice(data!.surveys);
+  const latest = surveyRows[0];
   const latestEnps = latest ? enps(latest) : null;
 
   return (
@@ -71,7 +80,7 @@ export default async function EngagementPage() {
                 : '—',
               v: 'Latest participation (of active headcount)',
             },
-            { k: String(data!.surveys.length), v: 'Pulse surveys run' },
+            { k: String(surveyRows.length), v: 'Pulse surveys run' },
           ].map((s) => (
             <div key={s.v} className="bg-ink px-6 py-5 hover:bg-brand-50 transition-colors">
               <div className="text-2xl font-bold text-brand">{s.k}</div>
@@ -94,11 +103,12 @@ export default async function EngagementPage() {
           </button>
         </form>
 
+        <TableControls basePath="/engagement" q={paging.q} page={paging.page} hasMore={hasMore} count={surveyRows.length} placeholder="Search questions…" />
         <div className="space-y-4">
-          {data!.surveys.length === 0 && (
+          {surveyRows.length === 0 && (
             <p className="font-heading italic text-mute-3">No surveys yet.</p>
           )}
-          {data!.surveys.map((s) => {
+          {surveyRows.map((s) => {
             const score = enps(s);
             return (
               <section key={s.id} className="rounded-lg border border-line bg-ink px-5 py-4">

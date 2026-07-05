@@ -2,6 +2,9 @@ import { canUseModule } from '@hr/entitlements';
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +18,10 @@ const NEXT: Record<string, string> = {
 };
 
 /** Recruitment (L2): vacancies + pipeline board; hiring lands in Employee Master. */
-export default async function RecruitmentPage() {
+export default async function RecruitmentPage(props: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const paging = parsePaging(await props.searchParams);
   const ctx = await getTenantContext();
   if (!ctx) return null;
   if (!canUseModule(ctx.entitlements, 'recruitment')) {
@@ -35,7 +41,9 @@ export default async function RecruitmentPage() {
     >`select id, title, department, headcount, status from vacancies order by created_at desc`;
     const candidates = await db<
       { id: string; vacancy_id: string; full_name: string; email: string; status: string; source: string }[]
-    >`select id, vacancy_id, full_name, email, status, source from candidates order by created_at`;
+    >`select id, vacancy_id, full_name, email, status, source from candidates
+      where (${paging.q} = '' or full_name ilike ${paging.like} or email ilike ${paging.like})
+      order by created_at`;
     return { vacancies, candidates };
   });
 
@@ -68,6 +76,7 @@ export default async function RecruitmentPage() {
           </button>
         </form>
 
+        <TableControls basePath="/recruitment" q={paging.q} page={paging.page} hasMore={false} count={data!.candidates.length} placeholder="Search candidates by name, email…" />
         {data!.vacancies.map((v) => {
           const pipeline = data!.candidates.filter((c) => c.vacancy_id === v.id);
           return (

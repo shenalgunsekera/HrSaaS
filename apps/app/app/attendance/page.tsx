@@ -1,6 +1,9 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
 import { ExportBar } from '../../components/ExportBar';
+import { TableControls } from '../../components/TableControls';
+import { pageSlice, parsePaging } from '../../lib/paging';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -17,9 +20,11 @@ const STATUS_STYLE: Record<string, string> = {
 
 /** Attendance (L1): manual capture + month register. */
 export default async function AttendancePage(props: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; q?: string; page?: string }>;
 }) {
-  const { month: monthParam } = await props.searchParams;
+  const sp = await props.searchParams;
+  const { month: monthParam } = sp;
+  const paging = parsePaging(sp);
   const month = /^\d{4}-\d{2}$/.test(monthParam ?? '') ? monthParam! : new Date().toISOString().slice(0, 7);
   const ctx = await getTenantContext();
   if (!ctx) return null;
@@ -32,9 +37,13 @@ export default async function AttendancePage(props: {
     >`select e.employee_number, to_char(a.day,'YYYY-MM-DD') as day, a.status, a.clock_in, a.clock_out
       from attendance_records a join employees e on e.id = a.employee_id
       where to_char(a.day,'YYYY-MM') = ${month}
-      order by a.day desc, e.employee_number`;
+        and (${paging.q} = '' or e.employee_number ilike ${paging.like}
+             or a.status ilike ${paging.like})
+      order by a.day desc, e.employee_number
+      limit ${paging.pageSize + 1} offset ${paging.offset}`;
     return { employees, rows };
   });
+  const { rows: attRows, hasMore } = pageSlice(data!.rows);
   const themeVars = (ctx.theme?.colors ?? {}) as React.CSSProperties;
 
   return (
@@ -82,6 +91,7 @@ export default async function AttendancePage(props: {
           </button>
         </form>
 
+        <TableControls basePath="/attendance" q={paging.q} page={paging.page} hasMore={hasMore} count={attRows.length} extra={{ month }} placeholder="Search employee №, status…" />
         <div className="rounded-lg border border-line overflow-x-auto">
           <table className="w-full font-body text-sm">
             <thead>
@@ -92,10 +102,10 @@ export default async function AttendancePage(props: {
               </tr>
             </thead>
             <tbody>
-              {data!.rows.length === 0 && (
+              {attRows.length === 0 && (
                 <tr><td colSpan={5} className="px-5 py-8 font-heading italic text-mute-3">No records for {month}.</td></tr>
               )}
-              {data!.rows.map((r) => (
+              {attRows.map((r) => (
                 <tr key={`${r.employee_number}-${r.day}`} className="border-b border-line last:border-b-0 hover:bg-brand-50 transition-colors">
                   <td className="px-5 py-3 text-mute-2">{r.day}</td>
                   <td className="px-5 py-3 font-semibold">{r.employee_number}</td>
