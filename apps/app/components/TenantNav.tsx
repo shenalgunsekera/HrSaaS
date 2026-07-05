@@ -19,10 +19,10 @@ export function TenantNav({ items }: { items: NavItem[] }) {
           <Link
             key={item.href}
             href={item.href}
-            className={`px-4 py-2.5 font-body text-xs tracking-widest uppercase transition-colors whitespace-nowrap border-l-2 ${
+            className={`md:mx-3 px-3 py-2 font-body text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
               active
-                ? 'text-brand border-brand bg-brand-50'
-                : 'text-mute-2 border-transparent hover:text-brand hover:border-line'
+                ? 'text-brand bg-brand-50'
+                : 'text-mute-1 hover:text-brand hover:bg-surface'
             }`}
           >
             {item.label}

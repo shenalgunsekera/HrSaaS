@@ -81,12 +81,8 @@ export default async function Home() {
           </p>
         </Reveal>
         <Reveal delay={0.08}>
-          <h1 className="font-display text-chalk leading-[0.92] mb-12" style={{ fontSize: 'clamp(44px, 6vw, 88px)' }}>
-            GOOD DAY,
-            <br />
-            <span className="bg-brand-gradient bg-clip-text text-transparent">
-              {displayName.toUpperCase()}
-            </span>
+          <h1 className="text-2xl font-bold tracking-tight text-chalk mb-8">
+            Good day, <span className="text-brand">{displayName}</span>
           </h1>
         </Reveal>
 
@@ -94,7 +90,7 @@ export default async function Home() {
           {cards.map((c, i) => (
             <Reveal key={c.v} delay={0.12 + i * 0.04} y={14} className="bg-ink">
               <Link href={c.href} className="block px-7 py-6 hover:bg-brand-50 transition-colors duration-300 h-full">
-                <div className="font-display text-4xl md:text-5xl text-brand">{c.k}</div>
+                <div className="text-3xl font-bold text-brand">{c.k}</div>
                 <div className="font-body text-sm text-mute-2 mt-1.5">{c.v}</div>
               </Link>
             </Reveal>
@@ -111,7 +107,7 @@ export default async function Home() {
             </span>
             {stats?.latest_period ? (
               <>
-                <span className="font-display text-3xl text-chalk">{stats.latest_period}</span>
+                <span className="text-xl font-bold text-chalk">{stats.latest_period}</span>
                 <span className="font-body text-sm text-mute-2">
                   net LKR {fmt(stats.latest_net)} · {stats.latest_status}
                 </span>

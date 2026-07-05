@@ -55,7 +55,7 @@ export default async function StatusPage() {
               className="h-14 w-14 object-contain border border-line bg-ink p-1"
             />
           )}
-          <p className="font-body text-xs tracking-widest3 text-brand uppercase">
+          <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase">
             Tenant instance · {ctx.slug}
           </p>
         </div>
@@ -80,13 +80,13 @@ export default async function StatusPage() {
             { k: ctx.tier, v: 'Entitlement tier' },
           ].map((s) => (
             <div key={s.v} className="bg-ink px-8 py-6 hover:bg-brand-50 transition-colors duration-300">
-              <div className="font-display text-4xl md:text-5xl text-brand">{s.k}</div>
+              <div className="text-3xl font-bold text-brand">{s.k}</div>
               <div className="font-body text-sm text-mute-2 mt-1.5">{s.v}</div>
             </div>
           ))}
         </div>
 
-        <p className="font-body text-xs tracking-widest3 text-brand uppercase mt-14 mb-6">
+        <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mt-14 mb-6">
           Modules resolved from the feature-sheet matrix
         </p>
         <div className="flex flex-wrap gap-2">

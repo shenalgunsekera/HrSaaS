@@ -53,8 +53,8 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
 
   return (
     <main className="relative min-h-svh">
-      <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-16">
-        <Link href="/" className="font-body text-xs tracking-widest3 text-brand uppercase">
+      <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
+        <Link href="/" className="font-body text-xs font-semibold tracking-wider text-brand uppercase">
           ← All tenants
         </Link>
         <div className="flex flex-wrap items-center gap-5 mt-4 mb-2">
@@ -66,8 +66,8 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
               className="h-16 w-16 object-contain border border-line bg-ink p-1"
             />
           )}
-          <h1 className="font-display text-chalk leading-[0.92]" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
-            {tenant.display_name.toUpperCase()}
+          <h1 className="text-3xl font-bold tracking-tight text-chalk">
+            {tenant.display_name}
           </h1>
           {brand && (
             <span
@@ -84,8 +84,8 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
         </p>
 
         {/* tier flip: pure entitlement change, applies live */}
-        <section className="border border-line bg-surface p-6 mb-10">
-          <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+        <section className="rounded-lg border border-line bg-surface p-5 mb-10">
+          <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
             Tier — currently {tenant.tier} (max held {tenant.max_tier_held})
           </p>
           <div className="flex flex-wrap gap-3">
@@ -95,9 +95,9 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
                 <button
                   type="submit"
                   disabled={t === tenant.tier}
-                  className={`px-6 py-2.5 font-display tracking-widest text-sm border transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
                     t === tenant.tier
-                      ? 'bg-brand text-white border-brand cursor-default'
+                      ? 'bg-brand text-white border-brand rounded-md cursor-default'
                       : 'border-line text-mute-1 hover:border-brand hover:text-brand'
                   }`}
                 >
@@ -113,8 +113,8 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
         </section>
 
         {/* branding: logo + brand color, updatable at any time, applies live */}
-        <section className="border border-line bg-surface p-6 mb-10">
-          <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+        <section className="rounded-lg border border-line bg-surface p-5 mb-10">
+          <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
             Branding — applies to the live instance immediately
           </p>
           <form
@@ -123,25 +123,25 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
             encType="multipart/form-data"
             className="flex flex-wrap items-end gap-3"
           >
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Brand color
               <input
                 name="brand"
                 placeholder="#4F46E5"
                 pattern="#[0-9a-fA-F]{6}"
                 defaultValue={brand ?? ''}
-                className="border border-line bg-ink px-4 py-3 font-body text-sm text-chalk focus:outline-none focus:border-brand"
+                className="rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk focus:outline-none focus:border-brand"
               />
             </label>
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Logo URL
               <input
                 name="logoUrl"
                 placeholder="https://…/logo.png"
-                className="border border-line bg-ink px-4 py-3 font-body text-sm text-chalk focus:outline-none focus:border-brand"
+                className="rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk focus:outline-none focus:border-brand"
               />
             </label>
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               or upload (≤300KB)
               <input
                 type="file"
@@ -150,12 +150,12 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
                 className="font-body text-sm text-mute-1"
               />
             </label>
-            <label className="flex items-center gap-2 font-body text-xs text-mute-2 uppercase tracking-widest pb-3">
+            <label className="flex items-center gap-2 font-body text-xs font-medium text-mute-1 pb-3">
               <input type="checkbox" name="clearLogo" /> clear logo
             </label>
             <button
               type="submit"
-              className="px-8 py-3 bg-brand-gradient text-white font-display text-base tracking-widest uppercase shadow-brand"
+              className="px-4 py-2.5 bg-brand text-white text-sm font-semibold rounded-md shadow-sm hover:bg-brand-600 transition-colors"
             >
               Update branding
             </button>
@@ -164,7 +164,7 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
 
         {/* resolved entitlements */}
         <section className="mb-10">
-          <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+          <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
             Resolved module entitlements
           </p>
           <div className="flex flex-wrap gap-2">
@@ -193,7 +193,7 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
 
         {/* domains */}
         <section className="mb-10">
-          <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">Domains</p>
+          <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">Domains</p>
           {domains.length === 0 ? (
             <p className="font-heading italic text-mute-3">None yet.</p>
           ) : (
@@ -209,12 +209,12 @@ export default async function TenantDetail(ctx: { params: Promise<{ slug: string
 
         {/* provisioning runs with step ledger */}
         <section>
-          <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+          <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
             Provisioning runs
           </p>
           <div className="space-y-4">
             {runs.map((r) => (
-              <div key={r.id} className="border border-line p-5">
+              <div key={r.id} className="rounded-lg border border-line p-4">
                 <div className="font-body text-sm text-chalk mb-3">
                   <span className="font-semibold">{r.kind}</span> · {r.status} · attempt{' '}
                   {r.attempt} · {new Date(r.created_at).toLocaleString()}

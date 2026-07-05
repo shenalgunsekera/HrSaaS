@@ -34,7 +34,7 @@ export default async function TenantList() {
         </p>
         <div className="flex flex-wrap items-baseline gap-6 mb-12">
           <h1 className="font-display text-chalk leading-[0.92]" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
-            TENANTS
+            Tenants
           </h1>
           <Link href="/prospects" className="font-body text-sm text-brand underline">
             Prospects →

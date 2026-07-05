@@ -4,7 +4,7 @@ import { withTenantDb } from '../../lib/objects';
 export const dynamic = 'force-dynamic';
 
 const input =
-  'border border-line bg-ink px-4 py-3 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
+  'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
 
 /** Employee Master (L1) — typed core list + intake. */
 export default async function EmployeesPage() {
@@ -33,15 +33,15 @@ export default async function EmployeesPage() {
 
   return (
     <main style={themeVars} className="relative min-h-svh">
-      <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-16">
-        <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+      <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
+        <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
           Employee Master · {ctx.slug}
         </p>
-        <h1 className="font-display text-chalk leading-[0.92] mb-10" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
-          EMPLOYEES
+        <h1 className="text-3xl font-bold tracking-tight text-chalk mb-8">
+          Employees
         </h1>
 
-        <form method="post" action="/api/employees" className="flex flex-wrap items-end gap-3 border border-line bg-surface p-6 mb-10">
+        <form method="post" action="/api/employees" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5 mb-10">
           {[
             ['employeeNumber', 'Emp №', 'EMP-001'],
             ['fullName', 'Full name', 'A. B. Perera'],
@@ -51,7 +51,7 @@ export default async function EmployeesPage() {
             ['department', 'Department', 'Production'],
             ['epfNumber', 'EPF №', ''],
           ].map(([name, label, ph]) => (
-            <label key={name} className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label key={name} className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               {label}
               <input
                 name={name}
@@ -62,17 +62,17 @@ export default async function EmployeesPage() {
               />
             </label>
           ))}
-          <button type="submit" className="px-8 py-3 bg-brand-gradient text-white font-display text-base tracking-widest uppercase shadow-brand">
+          <button type="submit" className="px-4 py-2.5 bg-brand text-white text-sm font-semibold rounded-md shadow-sm hover:bg-brand-600 transition-colors">
             Add employee
           </button>
         </form>
 
-        <div className="border border-line overflow-x-auto">
+        <div className="rounded-lg border border-line overflow-x-auto">
           <table className="w-full font-body text-sm">
             <thead>
               <tr className="border-b border-line bg-surface text-left">
                 {['№', 'Name', 'Department', 'Designation', 'Basic', 'Joined', 'Status'].map((h) => (
-                  <th key={h} className="px-5 py-3 font-body text-xs uppercase tracking-widest text-mute-2">{h}</th>
+                  <th key={h} className="px-5 py-3 font-body text-xs font-semibold text-mute-2">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -96,9 +96,9 @@ export default async function EmployeesPage() {
         </div>
 
         {/* offboarding: gratuity computed from verified statutory params */}
-        <form method="post" action="/api/employees/offboard" className="flex flex-wrap items-end gap-3 border border-line bg-surface p-6 mt-10">
+        <form method="post" action="/api/employees/offboard" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5 mt-10">
           <input type="hidden" name="_role" value="hr" />
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Offboard employee
             <select name="employeeNumber" className={input}>
               {employees.filter((e) => e.status === 'active').map((e) => (
@@ -108,17 +108,17 @@ export default async function EmployeesPage() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Last day
             <input name="lastDay" type="date" required className={input} />
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Reason
             <select name="reason" className={input}>
               {['resigned', 'retired', 'terminated', 'deceased'].map((r) => <option key={r}>{r}</option>)}
             </select>
           </label>
-          <button type="submit" className="px-8 py-3 border border-brand text-brand font-display text-base tracking-widest uppercase hover:bg-brand hover:text-white transition-colors">
+          <button type="submit" className="px-4 py-2.5 border border-brand text-brand text-sm font-medium rounded-md hover:bg-brand hover:text-white transition-colors">
             Offboard &amp; settle
           </button>
           <p className="font-body text-xs text-mute-3 pb-3">
@@ -127,12 +127,12 @@ export default async function EmployeesPage() {
         </form>
 
         {settlements.length > 0 && (
-          <div className="border border-line overflow-x-auto mt-6">
+          <div className="rounded-lg border border-line overflow-x-auto mt-6">
             <table className="w-full font-body text-sm">
               <thead>
                 <tr className="border-b border-line bg-surface text-left">
                   {['Employee', 'Last day', 'Reason', 'Years', 'Gratuity (LKR)'].map((h) => (
-                    <th key={h} className="px-5 py-3 font-body text-xs uppercase tracking-widest text-mute-2">{h}</th>
+                    <th key={h} className="px-5 py-3 font-body text-xs font-semibold text-mute-2">{h}</th>
                   ))}
                 </tr>
               </thead>

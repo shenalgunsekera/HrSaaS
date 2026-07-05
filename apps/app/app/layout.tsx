@@ -50,12 +50,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   />
                 )}
                 <span className="min-w-0">
-                  <span className="block font-display text-lg leading-tight tracking-wide text-chalk truncate">
-                    {displayName?.toUpperCase()}
+                  <span className="block text-sm font-bold leading-tight text-chalk truncate">
+                    {displayName}
                   </span>
-                  <span className="font-body text-[10px] tracking-widest2 uppercase text-mute-3">
-                    Tier {ctx.tier}
-                  </span>
+                  <span className="font-body text-[11px] text-mute-3">Tier {ctx.tier}</span>
                 </span>
               </Link>
               <div className="md:py-4 md:flex-1 min-w-0">

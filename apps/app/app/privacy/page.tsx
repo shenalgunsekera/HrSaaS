@@ -4,7 +4,7 @@ import { withTenantDb } from '../../lib/objects';
 export const dynamic = 'force-dynamic';
 
 const input =
-  'border border-line bg-ink px-4 py-3 font-body text-sm text-chalk focus:outline-none focus:border-brand';
+  'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk focus:outline-none focus:border-brand';
 const PURPOSES = ['hr-administration', 'payroll-processing', 'statutory-reporting', 'communications', 'analytics'];
 
 /** Data Privacy & Consent (L1, PDPA): consent register + DSR queue + dashboard. */
@@ -44,12 +44,12 @@ export default async function PrivacyPage() {
 
   return (
     <main style={themeVars} className="relative min-h-svh">
-      <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-16">
-        <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+      <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
+        <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
           Data Privacy &amp; Consent · {ctx.slug} · PDPA
         </p>
-        <h1 className="font-display text-chalk leading-[0.92] mb-10" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
-          PRIVACY
+        <h1 className="text-3xl font-bold tracking-tight text-chalk mb-8">
+          Privacy
         </h1>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line mb-10">
@@ -60,15 +60,15 @@ export default async function PrivacyPage() {
             { k: data!.stats.overdue_dsrs, v: 'Overdue (30-day SLA)' },
           ].map((s) => (
             <div key={s.v} className="bg-ink px-6 py-5 hover:bg-brand-50 transition-colors">
-              <div className={`font-display text-3xl ${s.v.startsWith('Overdue') && Number(s.k) > 0 ? 'text-red-600' : 'text-brand'}`}>{s.k}</div>
+              <div className={`text-2xl font-bold ${s.v.startsWith('Overdue') && Number(s.k) > 0 ? 'text-red-600' : 'text-brand'}`}>{s.k}</div>
               <div className="font-body text-xs text-mute-2 mt-1">{s.v}</div>
             </div>
           ))}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-10">
-          <form method="post" action="/api/privacy/consents" className="flex flex-wrap items-end gap-3 border border-line bg-surface p-6">
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <form method="post" action="/api/privacy/consents" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Employee
               <select name="employeeNumber" className={input}>
                 {data!.employees.map((e) => (
@@ -76,26 +76,26 @@ export default async function PrivacyPage() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Purpose
               <select name="purpose" className={input}>
                 {PURPOSES.map((p) => <option key={p}>{p}</option>)}
               </select>
             </label>
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Action
               <select name="action" className={input}>
                 <option>grant</option>
                 <option>withdraw</option>
               </select>
             </label>
-            <button type="submit" className="px-6 py-3 bg-brand-gradient text-white font-display text-sm tracking-widest uppercase shadow-brand">
+            <button type="submit" className="px-4 py-2.5 bg-brand text-white text-sm font-semibold rounded-md shadow-sm hover:bg-brand-600 transition-colors">
               Record consent
             </button>
           </form>
 
-          <form method="post" action="/api/privacy/dsr" className="flex flex-wrap items-end gap-3 border border-line bg-surface p-6">
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <form method="post" action="/api/privacy/dsr" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Employee
               <select name="employeeNumber" className={input}>
                 {data!.employees.map((e) => (
@@ -103,27 +103,27 @@ export default async function PrivacyPage() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Request
               <select name="kind" className={input}>
                 {['access', 'correction', 'erasure', 'portability'].map((k) => <option key={k}>{k}</option>)}
               </select>
             </label>
-            <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+            <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
               Detail
               <input name="detail" className={input} />
             </label>
-            <button type="submit" className="px-6 py-3 border border-brand text-brand font-display text-sm tracking-widest uppercase hover:bg-brand hover:text-white transition-colors">
+            <button type="submit" className="px-4 py-2.5 border border-brand text-brand text-sm font-medium rounded-md hover:bg-brand hover:text-white transition-colors">
               File DSR
             </button>
           </form>
         </div>
 
-        <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-3">Data-subject requests</p>
+        <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-3">Data-subject requests</p>
         <div className="space-y-3 mb-10">
           {data!.dsrs.length === 0 && <p className="font-heading italic text-mute-3">None filed.</p>}
           {data!.dsrs.map((d) => (
-            <div key={d.id} className="border border-line bg-ink px-6 py-4 flex flex-wrap items-center gap-5 hover:bg-brand-50 transition-colors">
+            <div key={d.id} className="rounded-lg border border-line bg-ink px-5 py-3.5 flex flex-wrap items-center gap-5 hover:bg-brand-50 transition-colors">
               <span className="font-body font-semibold text-sm min-w-44">{d.full_name} <span className="text-mute-3">{d.employee_number}</span></span>
               <span className="font-body text-xs uppercase tracking-wider px-3 py-1 border border-line text-mute-1">{d.kind}</span>
               {d.detail && <span className="font-heading italic text-sm text-mute-2">“{d.detail}”</span>}
@@ -148,13 +148,13 @@ export default async function PrivacyPage() {
           ))}
         </div>
 
-        <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-3">Consent register</p>
-        <div className="border border-line overflow-x-auto">
+        <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-3">Consent register</p>
+        <div className="rounded-lg border border-line overflow-x-auto">
           <table className="w-full font-body text-sm">
             <thead>
               <tr className="border-b border-line bg-surface text-left">
                 {['Employee', 'Purpose', 'Granted', 'Status'].map((h) => (
-                  <th key={h} className="px-5 py-3 font-body text-xs uppercase tracking-widest text-mute-2">{h}</th>
+                  <th key={h} className="px-5 py-3 font-body text-xs font-semibold text-mute-2">{h}</th>
                 ))}
               </tr>
             </thead>

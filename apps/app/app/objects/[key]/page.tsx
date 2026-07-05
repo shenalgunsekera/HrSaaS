@@ -7,7 +7,7 @@ import { getObject, withTenantDb } from '../../../lib/objects';
 export const dynamic = 'force-dynamic';
 
 const input =
-  'border border-line bg-ink px-4 py-3 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
+  'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk placeholder:text-mute-3 focus:outline-none focus:border-brand';
 
 /** The builder: add/remove fields; every change publishes a new version. */
 export default async function ObjectBuilder(routeCtx: { params: Promise<{ key: string }> }) {
@@ -20,13 +20,13 @@ export default async function ObjectBuilder(routeCtx: { params: Promise<{ key: s
 
   return (
     <main style={themeVars} className="relative min-h-svh">
-      <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-16">
-        <Link href="/objects" className="font-body text-xs tracking-widest3 text-brand uppercase">
+      <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
+        <Link href="/objects" className="font-body text-xs font-semibold tracking-wider text-brand uppercase">
           ← All objects
         </Link>
         <div className="flex flex-wrap items-baseline gap-4 mt-4 mb-2">
-          <h1 className="font-display text-chalk leading-[0.92]" style={{ fontSize: 'clamp(36px, 4.5vw, 64px)' }}>
-            {def.label.toUpperCase()}
+          <h1 className="text-3xl font-bold tracking-tight text-chalk">
+            {def.label}
           </h1>
           <span className="font-body text-sm text-mute-2">
             v{def.version} · {def.moduleKey} · {def.kind}
@@ -42,14 +42,14 @@ export default async function ObjectBuilder(routeCtx: { params: Promise<{ key: s
         <form
           method="post"
           action={`/api/objects/${key}/fields`}
-          className="flex flex-wrap items-end gap-3 border border-line bg-surface p-6 mb-10"
+          className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5 mb-10"
         >
           <input type="hidden" name="op" value="add" />
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Field label
             <input name="label" required placeholder="Incident Severity" className={input} />
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Type
             <select name="type" className={input}>
               {FIELD_TYPES.filter((t) => t !== 'section' && t !== 'computed').map((t) => (
@@ -57,20 +57,20 @@ export default async function ObjectBuilder(routeCtx: { params: Promise<{ key: s
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Options (select types, comma-sep)
             <input name="options" placeholder="Low, Medium, High" className={input} />
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Visible to roles (empty = all)
             <input name="visibleToRoles" placeholder="hr, tenant-admin" className={input} />
           </label>
-          <label className="flex items-center gap-2 font-body text-xs text-mute-2 uppercase tracking-widest pb-3">
+          <label className="flex items-center gap-2 font-body text-xs font-medium text-mute-1 pb-3">
             <input type="checkbox" name="required" /> required
           </label>
           <button
             type="submit"
-            className="px-8 py-3 bg-brand-gradient text-white font-display text-base tracking-widest uppercase shadow-brand"
+            className="px-4 py-2.5 bg-brand text-white text-sm font-semibold rounded-md shadow-sm hover:bg-brand-600 transition-colors"
           >
             Add field
           </button>
@@ -87,7 +87,7 @@ export default async function ObjectBuilder(routeCtx: { params: Promise<{ key: s
             if (fields.length === 0) return null;
             return (
               <section key={s.key} className="mb-8">
-                <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-3">
+                <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-3">
                   {s.label}
                 </p>
                 <div className="border border-line divide-y divide-line">

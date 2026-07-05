@@ -4,7 +4,7 @@ import { withTenantDb } from '../../lib/objects';
 export const dynamic = 'force-dynamic';
 
 const input =
-  'border border-line bg-ink px-4 py-3 font-body text-sm text-chalk focus:outline-none focus:border-brand';
+  'rounded-md border border-line bg-ink px-3 py-2 font-body text-sm text-chalk focus:outline-none focus:border-brand';
 const fmt = (v: string | number) => Number(v).toLocaleString(undefined, { minimumFractionDigits: 2 });
 
 /** Financial Wellness (L1): advances & loans, recovered through payroll. */
@@ -33,12 +33,12 @@ export default async function WellnessPage() {
 
   return (
     <main className="relative min-h-svh">
-      <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-16">
-        <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
+      <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 py-10">
+        <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
           Financial Wellness · {ctx.slug}
         </p>
-        <h1 className="font-display text-chalk leading-[0.92] mb-10" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
-          ADVANCES &amp; LOANS
+        <h1 className="text-3xl font-bold tracking-tight text-chalk mb-8">
+          Advances &amp; Loans
         </h1>
 
         <div className="grid grid-cols-3 gap-px bg-line border border-line mb-10">
@@ -48,14 +48,14 @@ export default async function WellnessPage() {
             { k: data!.stats.pending, v: 'Pending approval' },
           ].map((s) => (
             <div key={s.v} className="bg-ink px-6 py-5 hover:bg-brand-50 transition-colors">
-              <div className="font-display text-3xl text-brand">{s.k}</div>
+              <div className="text-2xl font-bold text-brand">{s.k}</div>
               <div className="font-body text-xs text-mute-2 mt-1">{s.v}</div>
             </div>
           ))}
         </div>
 
-        <form method="post" action="/api/wellness/advances" className="flex flex-wrap items-end gap-3 border border-line bg-surface p-6 mb-10">
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+        <form method="post" action="/api/wellness/advances" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5 mb-10">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Employee
             <select name="employeeNumber" className={input}>
               {data!.employees.map((e) => (
@@ -63,23 +63,23 @@ export default async function WellnessPage() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Kind
             <select name="kind" className={input}><option>advance</option><option>loan</option></select>
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Principal (LKR)
             <input name="principal" type="number" required className={input} />
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Monthly installment
             <input name="installment" type="number" required className={input} />
           </label>
-          <label className="flex flex-col gap-1 font-body text-xs text-mute-2 uppercase tracking-widest">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
             Reason
             <input name="reason" className={input} />
           </label>
-          <button type="submit" className="px-8 py-3 bg-brand-gradient text-white font-display text-base tracking-widest uppercase shadow-brand">
+          <button type="submit" className="px-4 py-2.5 bg-brand text-white text-sm font-semibold rounded-md shadow-sm hover:bg-brand-600 transition-colors">
             Request
           </button>
           <p className="font-body text-xs text-mute-3 pb-3">
@@ -91,7 +91,7 @@ export default async function WellnessPage() {
         <div className="space-y-3">
           {data!.advances.length === 0 && <p className="font-heading italic text-mute-3">No advances or loans yet.</p>}
           {data!.advances.map((a) => (
-            <div key={a.id} className="border border-line bg-ink px-6 py-4 flex flex-wrap items-center gap-5 hover:bg-brand-50 transition-colors">
+            <div key={a.id} className="rounded-lg border border-line bg-ink px-5 py-3.5 flex flex-wrap items-center gap-5 hover:bg-brand-50 transition-colors">
               <span className="font-body font-semibold text-sm min-w-44">{a.full_name} <span className="text-mute-3">{a.employee_number}</span></span>
               <span className="font-body text-xs uppercase tracking-wider px-3 py-1 border border-line text-mute-1">{a.kind}</span>
               <span className="font-body text-sm text-mute-2">
