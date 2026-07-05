@@ -43,6 +43,13 @@
       "when": 1783239345418,
       "tag": "0005_privacy-consent",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783254075318,
+      "tag": "0006_contractors",
+      "breakpoints": true
     }
   ]
 }
