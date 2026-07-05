@@ -38,6 +38,21 @@ export async function POST(request: NextRequest) {
       on conflict (employee_number) do nothing
       returning id`;
     if (!row) return { error: 'employee number already exists' };
+    // orchestrated onboarding: checklist spawns with the hire
+    const onboarding: Array<[string, string]> = [
+      ['Collect NIC / passport copy', 'documents'],
+      ['Signed employment contract on file', 'documents'],
+      ['EPF/ETF registration submitted', 'statutory'],
+      ['Bank account details verified', 'payroll'],
+      ['Record privacy consents', 'privacy'],
+      ['Issue assets (laptop, access card…)', 'assets'],
+      ['System access provisioned', 'it'],
+      ['Assign buddy & induction session', 'experience'],
+    ];
+    for (let i = 0; i < onboarding.length; i++) {
+      await db`insert into lifecycle_tasks (employee_id, kind, task, category, display_order)
+        values (${row.id}, 'onboarding', ${onboarding[i]![0]}, ${onboarding[i]![1]}, ${i})`;
+    }
     await db`insert into audit_log (action, object_key, record_id)
       values ('employee.created', 'employee', ${row.id})`;
     return { id: row.id };

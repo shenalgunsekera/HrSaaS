@@ -52,6 +52,20 @@ export async function POST(request: NextRequest) {
       values (${emp.id}, ${lastDay}, ${reason}, ${completedYears}, ${emp.basic_salary}, ${gratuity})
       returning id`;
     await db`update employees set status = ${reason}, updated_at = now() where id = ${emp.id}`;
+    // orchestrated offboarding checklist; settlement step auto-completes
+    const offboarding: Array<[string, string, boolean]> = [
+      ['Final settlement incl. gratuity computed', 'payroll', true],
+      ['Asset return (laptop, access card, keys…)', 'assets', false],
+      ['System access revoked', 'it', false],
+      ['EPF/ETF exit notifications filed', 'statutory', false],
+      ['Exit interview conducted', 'experience', false],
+      ['Final payslip & service letter issued', 'documents', false],
+    ];
+    for (let i = 0; i < offboarding.length; i++) {
+      const [task, category, done] = offboarding[i]!;
+      await db`insert into lifecycle_tasks (employee_id, kind, task, category, display_order, done, done_at)
+        values (${emp.id}, 'offboarding', ${task}, ${category}, ${i}, ${done}, ${done ? new Date() : null})`;
+    }
     await db`insert into audit_log (action, object_key, record_id, detail)
       values ('employee.offboarded', 'employee', ${emp.id},
               ${db.json({ reason, lastDay, completedYears, gratuity, role })})`;
