@@ -1,6 +1,7 @@
 import { canUseModule } from '@hr/entitlements';
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
+import { ExportBar } from '../../components/ExportBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +57,10 @@ export default async function TrainingPage() {
         <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
           Training · {ctx.slug}
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-chalk mb-8">Training</h1>
+        <div className="flex flex-wrap items-center gap-4 mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-chalk">Training</h1>
+          <ExportBar entity="enrollments" />
+        </div>
 
         <div className="grid grid-cols-3 gap-px bg-line border border-line mb-8">
           {[

@@ -1,5 +1,6 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
+import { ExportBar } from '../../components/ExportBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,9 +49,10 @@ export default async function PrivacyPage() {
         <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
           Data Privacy &amp; Consent · {ctx.slug} · PDPA
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-chalk mb-8">
-          Privacy
-        </h1>
+        <div className="flex flex-wrap items-center gap-4 mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-chalk">Privacy</h1>
+          <ExportBar entity="dsrs" />
+        </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line mb-10">
           {[

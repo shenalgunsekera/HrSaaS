@@ -1,6 +1,7 @@
 import { canUseModule } from '@hr/entitlements';
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
+import { ExportBar } from '../../components/ExportBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,10 @@ export default async function PerformancePage() {
         <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
           Performance · {ctx.slug}
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-chalk mb-8">Performance</h1>
+        <div className="flex flex-wrap items-center gap-4 mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-chalk">Performance</h1>
+          <ExportBar entity="goals" />
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-8">
           <form method="post" action="/api/performance/goals" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5">

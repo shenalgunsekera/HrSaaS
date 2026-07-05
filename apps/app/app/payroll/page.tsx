@@ -1,5 +1,6 @@
 import { getTenantContext } from '../../lib/tenant';
 import { withTenantDb } from '../../lib/objects';
+import { ExportBar } from '../../components/ExportBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,9 +45,10 @@ export default async function PayrollPage() {
         <p className="font-body text-xs font-semibold tracking-wider text-brand uppercase mb-4">
           Payroll · {ctx.slug} · statutory rates from verified tenant reference data
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-chalk mb-8">
-          Payroll
-        </h1>
+        <div className="flex flex-wrap items-center gap-4 mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-chalk">Payroll</h1>
+          <ExportBar entity="payslips" />
+        </div>
 
         <form method="post" action="/api/payroll/run" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5 mb-10">
           <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
