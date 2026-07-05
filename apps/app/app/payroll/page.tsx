@@ -63,6 +63,22 @@ export default async function PayrollPage() {
 
         {run && (
           <>
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              {run.status === 'draft' && (
+                <form method="post" action={`/api/payroll/${run.id}/approve`}>
+                  <input type="hidden" name="_role" value="payroll-admin" />
+                  <button type="submit" className="px-6 py-2.5 border border-brand text-brand font-display text-sm tracking-widest uppercase hover:bg-brand hover:text-white transition-colors">
+                    Approve &amp; lock {run.period}
+                  </button>
+                </form>
+              )}
+              <a href={`/api/payroll/${run.id}/bank-file`} className="px-6 py-2.5 border border-line text-mute-1 font-display text-sm tracking-widest uppercase hover:border-brand hover:text-brand transition-colors">
+                Bank transfer file ↓
+              </a>
+              <a href={`/api/payroll/${run.id}/statutory-file`} className="px-6 py-2.5 border border-line text-mute-1 font-display text-sm tracking-widest uppercase hover:border-brand hover:text-brand transition-colors">
+                EPF/ETF/APIT file ↓
+              </a>
+            </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line mb-10">
               {[
                 { k: run.period, v: `Latest run · ${run.status}` },
