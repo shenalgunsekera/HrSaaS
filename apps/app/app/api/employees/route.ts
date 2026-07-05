@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { withTenantDb } from '../../../lib/objects';
+import { dispatchWebhooks } from '../../../lib/webhooks';
 
 /** Create an employee (typed core). Minimal L1 intake; full form via UI. */
 export async function POST(request: NextRequest) {
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
     }
     await db`insert into audit_log (action, object_key, record_id)
       values ('employee.created', 'employee', ${row.id})`;
+    await dispatchWebhooks(db, 'employee.created', { id: row.id, employeeNumber, fullName });
     return { id: row.id };
   });
 

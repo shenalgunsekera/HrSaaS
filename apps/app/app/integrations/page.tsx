@@ -8,11 +8,16 @@ const input =
 
 /** Integrations & API (L1): key management + public API reference. */
 export default async function IntegrationsPage(props: {
-  searchParams: Promise<{ key?: string }>;
+  searchParams: Promise<{ key?: string; whsecret?: string }>;
 }) {
-  const { key: freshKey } = await props.searchParams;
+  const { key: freshKey, whsecret } = await props.searchParams;
   const ctx = await getTenantContext();
   if (!ctx) return null;
+  const hooks =
+    (await withTenantDb((db) =>
+      db<{ id: string; url: string; events: string[]; active: boolean }[]>`
+        select id, url, events, active from webhooks order by created_at desc`,
+    )) ?? [];
   const keys =
     (await withTenantDb((db) =>
       db<
@@ -83,6 +88,52 @@ export default async function IntegrationsPage(props: {
                         </button>
                       </form>
                     )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 className="text-xl font-bold tracking-tight text-chalk mt-12 mb-4">Webhooks</h2>
+        {whsecret && (
+          <div className="rounded-lg border border-brand bg-brand-50 p-5 mb-6">
+            <p className="text-sm font-semibold text-chalk mb-1">Signing secret — copy now, shown once.</p>
+            <code className="font-mono text-sm text-brand break-all">{whsecret}</code>
+          </div>
+        )}
+        <form method="post" action="/api/integrations/webhooks" className="flex flex-wrap items-end gap-3 rounded-lg border border-line bg-surface p-5 mb-6">
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
+            Endpoint URL
+            <input name="url" required placeholder="https://example.com/hooks/hr" className={`${input} min-w-72`} />
+          </label>
+          <label className="flex flex-col gap-1 font-body text-xs font-medium text-mute-1">
+            Events (empty = all)
+            <input name="events" placeholder="employee.created, payroll.run_approved, leave.decided" className={`${input} min-w-72`} />
+          </label>
+          <button type="submit" className="px-4 py-2.5 border border-brand text-brand text-sm font-medium rounded-md hover:bg-brand hover:text-white transition-colors">
+            Register webhook
+          </button>
+        </form>
+        <div className="rounded-lg border border-line overflow-x-auto">
+          <table className="w-full font-body text-sm">
+            <thead>
+              <tr className="border-b border-line bg-surface text-left">
+                {['URL', 'Events', 'Status'].map((h) => (
+                  <th key={h} className="px-5 py-3 font-body text-xs font-semibold text-mute-2">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {hooks.length === 0 && (
+                <tr><td colSpan={3} className="px-5 py-6 font-heading italic text-mute-3">No webhooks registered.</td></tr>
+              )}
+              {hooks.map((h) => (
+                <tr key={h.id} className="border-b border-line last:border-b-0">
+                  <td className="px-5 py-3 font-mono text-xs">{h.url}</td>
+                  <td className="px-5 py-3 text-mute-2">{h.events.length ? h.events.join(', ') : 'all'}</td>
+                  <td className={`px-5 py-3 font-semibold ${h.active ? 'text-brand' : 'text-mute-3'}`}>
+                    {h.active ? 'active' : 'disabled'}
                   </td>
                 </tr>
               ))}

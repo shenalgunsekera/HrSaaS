@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { DEFAULT_ROLE_DEFINITIONS, isAllowed, type Role } from '@hr/rbac';
 import { withTenantDb } from '../../../../../lib/objects';
+import { dispatchWebhooks } from '../../../../../lib/webhooks';
 
 /** Approve a draft payroll run — locks it against re-runs. Audited. */
 export async function POST(
@@ -40,6 +41,7 @@ export async function POST(
     }
     await db`insert into audit_log (action, object_key, record_id, detail)
       values ('payroll.run_approved', 'payroll-run', ${runId}, ${db.json({ role })})`;
+    await dispatchWebhooks(db, 'payroll.run_approved', { runId });
     return { status: 200 as const, body: { runId, status: 'approved' } };
   });
 
