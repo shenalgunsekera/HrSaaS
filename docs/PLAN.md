@@ -12,7 +12,7 @@ before the next starts.
 | 2 | Factory + control-plane console + entitlement flips | ✅ **Complete** (2026-07-05) |
 | 3 | Isolation end-to-end: dedicated DB per tenant, RLS, RBAC, tenant resolution | ✅ **Complete** (2026-07-05) |
 | 4 | Dynamic schema engine (wizard, generated forms, templates) | ✅ **Complete** (2026-07-05) — remaining module templates transcribe in Phase 6+ as their cores land |
-| 5 | Marketing site + consultation → provisioning handoff | ⬜ |
+| 5 | Marketing site + consultation → provisioning handoff | ✅ **Complete** (2026-07-05) |
 | 6 | L1 modules (incl. SL statutory payroll + gratuity, Leave↔Attendance↔Payroll coupling) | ⬜ |
 | 7 | L2 & L3 modules (+ disciplinary/grievance, multi-entity payroll) | ⬜ |
 | 8 | L4 Analytics, then L5 AI & agent orchestration with governance | ⬜ |
@@ -149,6 +149,30 @@ role 403 (RBAC gate); field removed (v5) and instantly gone from the
 generated form/table. Template adoption on globex instantiated the full
 Employee Master A–K field set. Role-based field visibility verified in
 generated views (`?role=` simulation until per-tenant auth).
+
+## Phase 5 — what was built
+
+- **Marketing site** (`apps/marketing`, :3001): home with real product story;
+  `/pricing` fully data-driven from `@hr/entitlements` (tier cards + complete
+  module matrix — cannot drift from what the product enforces); `/book`
+  consultation form.
+- **Scheduler adapter** (`lib/scheduler.ts`): booking behind an interface
+  (local stub now, Cal.com when credentials exist — ADR-0007 §3).
+- **Lead → prospect**: `POST /api/leads` books via the adapter and writes a
+  `prospects` row (control plane) — marketing lead is the system of record.
+- **Admin `/prospects`**: pipeline view; one-click **Convert to tenant**
+  (slug/tier/brand) → `enqueueProvision` carries company name, contact email
+  (becomes the tenant-admin user) and branding intake straight into the
+  factory queue. Prospect links to its tenant afterward.
+
+## Phase 5 DoD verification (2026-07-05)
+
+Booked "Hemas Textiles" on the marketing site → prospect appeared in admin →
+converted with slug `hemas`, L2, `#0E7490` → worker provisioned unattended →
+instance live at :4303 with correct name, tier, brand, and
+`nadeesha@hemastextiles.lk` as tenant-admin (zero re-keying). Incidentally
+verified multi-worker safety: two workers were running and FOR UPDATE SKIP
+LOCKED gave the run to exactly one.
 
 ## Changelog
 

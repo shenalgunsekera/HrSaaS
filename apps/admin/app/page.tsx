@@ -33,9 +33,14 @@ export default async function TenantList() {
         <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
           Control Plane · System Admin
         </p>
-        <h1 className="font-display text-chalk leading-[0.92] mb-12" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
-          TENANTS
-        </h1>
+        <div className="flex flex-wrap items-baseline gap-6 mb-12">
+          <h1 className="font-display text-chalk leading-[0.92]" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
+            TENANTS
+          </h1>
+          <Link href="/prospects" className="font-body text-sm text-brand underline">
+            Prospects →
+          </Link>
+        </div>
 
         {/* create tenant → enqueues a run; the worker provisions unattended */}
         <form
