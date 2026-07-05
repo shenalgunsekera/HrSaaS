@@ -4,6 +4,7 @@ import { withTenantDb } from '../../lib/objects';
 export const dynamic = 'force-dynamic';
 
 interface SlipRow {
+  id: string;
   full_name: string;
   employee_number: string;
   gross: string;
@@ -28,7 +29,7 @@ export default async function PayrollPage() {
     >`select id, period, status, totals from payroll_runs order by period desc limit 1`;
     if (!run) return { run: null, slips: [] as SlipRow[] };
     const slips = await db<SlipRow[]>`
-      select e.full_name, e.employee_number, p.gross, p.no_pay_days, p.no_pay_deduction,
+      select p.id, e.full_name, e.employee_number, p.gross, p.no_pay_days, p.no_pay_deduction,
              p.epf_employee, p.epf_employer, p.etf_employer, p.apit, p.net
       from payslips p join employees e on e.id = p.employee_id
       where p.run_id = ${run.id} order by e.employee_number`;
@@ -88,7 +89,12 @@ export default async function PayrollPage() {
                 <tbody>
                   {data!.slips.map((s) => (
                     <tr key={s.employee_number} className="border-b border-line last:border-b-0 hover:bg-brand-50 transition-colors">
-                      <td className="px-4 py-3 font-semibold">{s.full_name} <span className="text-mute-3">{s.employee_number}</span></td>
+                      <td className="px-4 py-3 font-semibold">
+                        <a href={`/payslips/${s.id}`} className="hover:text-brand underline decoration-line underline-offset-4">
+                          {s.full_name}
+                        </a>{' '}
+                        <span className="text-mute-3">{s.employee_number}</span>
+                      </td>
                       <td className="px-4 py-3">{fmt(s.gross)}</td>
                       <td className="px-4 py-3">{Number(s.no_pay_days)}</td>
                       <td className="px-4 py-3">{fmt(s.no_pay_deduction)}</td>
