@@ -44,7 +44,6 @@ export default async function StatusPage() {
 
   return (
     <main style={themeVars} className="relative min-h-svh border-b border-line overflow-hidden">
-      <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
       <div className="absolute inset-0 bg-brand-radial pointer-events-none" aria-hidden="true" />
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-24">
         <div className="flex items-center gap-4 mb-6">

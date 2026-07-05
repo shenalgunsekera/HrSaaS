@@ -77,7 +77,6 @@ export default async function RecordsPage(routeCtx: {
 
     return (
       <main style={themeVars} className="relative min-h-svh">
-        <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
         <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-16">
           <Link href={`/objects/${key}`} className="font-body text-xs tracking-widest3 text-brand uppercase">
             ← Builder

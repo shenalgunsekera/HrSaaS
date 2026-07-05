@@ -50,7 +50,6 @@ export default function Gallery() {
     <main style={demoThemes[themeName]} className="bg-ink text-chalk">
       {/* hero */}
       <section className="relative border-b border-line overflow-hidden">
-        <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
         <div className="absolute inset-0 bg-brand-radial pointer-events-none" aria-hidden="true" />
         <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 pt-28 pb-16">
           <SectionHeading

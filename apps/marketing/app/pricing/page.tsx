@@ -18,7 +18,6 @@ const TIER_PITCH: Record<string, string> = {
 export default function Pricing() {
   return (
     <main className="relative min-h-svh">
-      <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-24">
         <SectionHeading
           kicker="Pricing · Five levels"

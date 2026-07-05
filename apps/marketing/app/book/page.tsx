@@ -13,7 +13,6 @@ async function BookInner({ searchParams }: { searchParams: Promise<{ booked?: st
   const { booked } = await searchParams;
   return (
     <main className="relative min-h-svh">
-      <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
       <div className="absolute inset-0 bg-brand-radial pointer-events-none" aria-hidden="true" />
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-24 grid lg:grid-cols-2 gap-16">
         <SectionHeading

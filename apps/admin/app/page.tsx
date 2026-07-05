@@ -28,7 +28,6 @@ export default async function TenantList() {
 
   return (
     <main className="relative min-h-svh">
-      <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
       <div className="relative max-w-[1600px] mx-auto px-6 md:px-12 py-16">
         <p className="font-body text-xs tracking-widest3 text-brand uppercase mb-4">
           Control Plane · System Admin

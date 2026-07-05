@@ -4,7 +4,6 @@ import { Reveal, SectionHeading } from '@hr/design-system';
 export default function Home() {
   return (
     <main className="relative min-h-svh flex items-center border-b border-line overflow-hidden">
-      <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
       <div className="absolute inset-0 bg-brand-radial pointer-events-none" aria-hidden="true" />
       <div className="relative w-full max-w-[1600px] mx-auto px-6 md:px-12 py-24">
         <SectionHeading
