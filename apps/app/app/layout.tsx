@@ -65,6 +65,12 @@ const NAV: NavSpec[] = [
     ],
   },
   {
+    label: 'Relations',
+    items: [
+      { href: '/cases', label: 'Disciplinary & Grievance', icon: '⚖', always: true },
+    ],
+  },
+  {
     label: 'Build',
     items: [
       { href: '/objects', label: 'Objects', icon: '⬡', always: true },
