@@ -176,6 +176,20 @@ export const ENTITIES: Record<string, EntityDef> = {
       order by s.created_at desc`,
     deletable: false,
   },
+  'competency-gaps': {
+    label: 'Competency Gap Analysis',
+    moduleKey: 'competency',
+    query: `select e.employee_number, e.full_name, e.designation, c.name as competency,
+      c.category, r.required_level as required, a.level as actual,
+      (r.required_level - coalesce(a.level, 0)) as gap
+      from employees e
+      join competency_requirements r on r.designation = e.designation
+      join competencies c on c.id = r.competency_id
+      left join competency_assessments a on a.competency_id = c.id and a.employee_id = e.id
+      where e.status = 'active'
+      order by gap desc, e.employee_number`,
+    deletable: false,
+  },
   surveys: {
     label: 'Pulse Surveys',
     moduleKey: 'experience-engagement',

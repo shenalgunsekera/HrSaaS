@@ -113,6 +113,13 @@
       "when": 1783273697338,
       "tag": "0015_succession",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1783310453887,
+      "tag": "0016_competency",
+      "breakpoints": true
     }
   ]
 }
