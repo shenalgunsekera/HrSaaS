@@ -176,6 +176,16 @@ export const ENTITIES: Record<string, EntityDef> = {
       order by s.created_at desc`,
     deletable: false,
   },
+  'employee-skills': {
+    label: 'Verified Skills Inventory',
+    moduleKey: 'skills-intelligence',
+    query: `select e.employee_number, e.full_name, s.name as skill,
+      es.proficiency, es.verified
+      from employee_skills es join skills s on s.id = es.skill_id
+      join employees e on e.id = es.employee_id
+      order by es.verified desc, s.name`,
+    deletable: false,
+  },
   'competency-gaps': {
     label: 'Competency Gap Analysis',
     moduleKey: 'competency',
