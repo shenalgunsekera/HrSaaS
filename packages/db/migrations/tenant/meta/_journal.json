@@ -127,6 +127,20 @@
       "when": 1783310950855,
       "tag": "0017_skills",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1783311590780,
+      "tag": "0018_workforce-planning",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1783311694058,
+      "tag": "0019_multi-entity",
+      "breakpoints": true
     }
   ]
 }

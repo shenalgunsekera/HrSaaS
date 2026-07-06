@@ -176,6 +176,25 @@ export const ENTITIES: Record<string, EntityDef> = {
       order by s.created_at desc`,
     deletable: false,
   },
+  'legal-entities': {
+    label: 'Legal Entities',
+    moduleKey: 'multi-entity-payroll',
+    query: `select le.name, le.country, le.currency,
+      (select count(*) from employees e where e.entity_id = le.id and e.status='active') as headcount,
+      coalesce((select sum(e.basic_salary) from employees e where e.entity_id = le.id and e.status='active'),0) as monthly_basic
+      from legal_entities le order by le.name`,
+    deletable: false,
+  },
+  positions: {
+    label: 'Positions',
+    moduleKey: 'workforce-planning',
+    query: `select po.title, po.department, po.status, e.full_name as holder
+      from positions po left join employees e on e.id = po.holder_id
+      order by po.department, po.title`,
+    table: 'positions',
+    updatable: ['title', 'department', 'status'],
+    deletable: true,
+  },
   'employee-skills': {
     label: 'Verified Skills Inventory',
     moduleKey: 'skills-intelligence',

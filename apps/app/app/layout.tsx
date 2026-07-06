@@ -60,6 +60,8 @@ const NAV: NavSpec[] = [
       { href: '/succession', label: 'Succession', icon: '⇡', module: 'succession' },
       { href: '/competency', label: 'Competency', icon: '◨', module: 'competency' },
       { href: '/skills', label: 'Skills', icon: '✦', module: 'skills-intelligence' },
+      { href: '/workforce', label: 'Workforce Planning', icon: '▥', module: 'workforce-planning' },
+      { href: '/entities', label: 'Multi-Entity Payroll', icon: '⬢', module: 'multi-entity-payroll' },
     ],
   },
   {
