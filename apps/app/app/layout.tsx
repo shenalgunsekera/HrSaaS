@@ -65,6 +65,12 @@ const NAV: NavSpec[] = [
     ],
   },
   {
+    label: 'Insight',
+    items: [
+      { href: '/analytics', label: 'Analytics', icon: '◱', module: 'hr-analytics' },
+    ],
+  },
+  {
     label: 'Relations',
     items: [
       { href: '/cases', label: 'Disciplinary & Grievance', icon: '⚖', always: true },
