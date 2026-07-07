@@ -211,6 +211,21 @@ where tiered, RBAC where sensitive, live-verified, with search + pagination +
 CSV/branded-PDF export. Migrations 0010–0020. Navigation restructured into
 grouped sections. Tenant migrations now at 0020; 20 tenant tables + core.
 
+## Phase 8 — complete (2026-07-06)
+
+- **L4 HR Analytics** (`/analytics`): cross-module executive dashboard —
+  workforce, attendance/leave, payroll, talent, learning/relations sections +
+  composite HR health score. Pure aggregation over the tenant DB; graceful
+  zeros for empty modules (§8.2). Gated `hr-analytics`.
+- **L5 AI Assistant & Agent Orchestration** (`/ai`): data-grounded HR
+  assistant (intent-routed over the tenant's own tables, with explainability
+  sources) + agent orchestration under **human-in-the-loop governance** — no
+  agent action executes without HR/tenant-admin approval; every step audited.
+  Gated `ai-assistant`. Verified: agent launched a survey only after approval;
+  employee 403; audit trail complete.
+
+**All tiers L1–L5 are now functionally built.** Tenant migrations at 0022.
+
 ## Changelog
 
 - **2026-07-05** — Phase 2 delivered: queue-backed unattended factory worker,
