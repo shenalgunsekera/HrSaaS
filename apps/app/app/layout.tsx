@@ -68,6 +68,7 @@ const NAV: NavSpec[] = [
     label: 'Insight',
     items: [
       { href: '/analytics', label: 'Analytics', icon: '◱', module: 'hr-analytics' },
+      { href: '/ai', label: 'AI Assistant', icon: '✳', module: 'ai-assistant' },
     ],
   },
   {

@@ -148,6 +148,20 @@
       "when": 1783311902770,
       "tag": "0020_disciplinary",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1783396860244,
+      "tag": "0021_ai-agents",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1783397132433,
+      "tag": "0022_fix-agent-status",
+      "breakpoints": true
     }
   ]
 }
