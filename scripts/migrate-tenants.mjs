@@ -1,12 +1,15 @@
 /**
- * Migration orchestration across ALL tenant databases (§4.6 seed).
- * Applies pending tenant migrations to every active tenant's dedicated DB,
- * tracked per tenant in the control plane's `tenant_migrations` ledger.
+ * Migration orchestration across tenant databases (§4.6), tracked per tenant
+ * in the control plane's `tenant_migrations` ledger.
  *
- *   node scripts/migrate-tenants.mjs [--slug acme]   (default: all active)
+ *   node scripts/migrate-tenants.mjs                      all active tenants
+ *   node scripts/migrate-tenants.mjs --slug acme          one tenant
+ *   node scripts/migrate-tenants.mjs --canary globex,acme  wave 1 (cohort)
+ *   node scripts/migrate-tenants.mjs --rest globex,acme    wave 2 (complement)
  *
- * Wave rollout (canary cohort → fleet) arrives in Phase 9; local dev applies
- * to the fleet directly.
+ * Wave rollout: migrate the canary cohort first, verify, then --rest applies
+ * to everyone NOT in that cohort. Migrations are expand→migrate→contract
+ * (backward-compatible) so code and schema never move in lockstep.
  */
 import postgres from 'postgres';
 import { applyMigrations, ensurePostgres, loadSecret, tenantMigrationsDir } from './lib.mjs';
@@ -22,9 +25,18 @@ const cp = postgres(`postgres://postgres:${cpInfo.password}@127.0.0.1:${cpInfo.p
   onnotice: () => {},
 });
 
-const tenants = args.slug
+const cohort = (args.canary ?? args.rest ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+const all = args.slug
   ? await cp`select id, slug from tenants where slug = ${args.slug}`
   : await cp`select id, slug from tenants where status = 'active' and db_ref like 'local-docker:%' order by slug`;
+const tenants = args.canary
+  ? all.filter((t) => cohort.includes(t.slug))
+  : args.rest
+    ? all.filter((t) => !cohort.includes(t.slug))
+    : all;
+
+if (args.canary) console.log(`wave: canary cohort [${tenants.map((t) => t.slug).join(', ')}]`);
+if (args.rest) console.log(`wave: fleet remainder [${tenants.map((t) => t.slug).join(', ')}]`);
 
 let failed = 0;
 for (const t of tenants) {

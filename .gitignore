@@ -10,3 +10,4 @@ _secrets/
 .turbo/
 coverage/
 .DS_Store
+_backups/

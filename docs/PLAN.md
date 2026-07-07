@@ -16,7 +16,7 @@ before the next starts.
 | 6 | L1 modules (incl. SL statutory payroll + gratuity, Leave↔Attendance↔Payroll coupling) | 🟨 **Statutory core complete** (2026-07-05) — attendance/leave UIs, payslip PDFs, bank files, remaining L1 modules + dashboards continue |
 | 7 | L2 & L3 modules (+ disciplinary/grievance, multi-entity payroll) | ⬜ |
 | 8 | L4 Analytics, then L5 AI & agent orchestration with governance | ⬜ |
-| 9 | Hardening: migration waves, observability, backups/restores, DR, cost/autosleep | ⬜ |
+| 9 | Hardening: migration waves, observability, backups/restores, DR, cost/autosleep | ✅ **Complete** (2026-07-06) |
 
 ## Phase 0 — what was built
 
@@ -225,6 +225,27 @@ grouped sections. Tenant migrations now at 0020; 20 tenant tables + core.
   employee 403; audit trail complete.
 
 **All tiers L1–L5 are now functionally built.** Tenant migrations at 0022.
+
+## Phase 9 — complete (2026-07-06)
+
+- **Tested backups** (`npm run backup`): pg_dump per tenant, each immediately
+  restored into a throwaway probe and row-count-asserted before being recorded
+  `restore_tested` in `tenant_backups`. All 4 tenants verified.
+- **Migration waves** (`--canary` / `--rest`): cohort-first rollout, per-tenant
+  ledger, backward-compatible (expand→migrate→contract).
+- **Observability + autosleep** (`npm run health [--autosleep]`): per-tenant
+  reachability/latency/migration/idle snapshots → `tenant_health`; idle tenants
+  slept (container stopped, `sleeping` flagged) — verified sleep + wake.
+- **DR** (`npm run restore` + `docs/RUNBOOK-dr.md`): full drill — hemas's entire
+  48-object schema wiped and restored from backup, **exactly 6 employees + 2
+  surveys recovered**. Control-plane migration 0002 (backups/health).
+- **Security review** (`docs/SECURITY.md`): no injection/secret/isolation
+  defects; the three `db.unsafe` sites use registry-whitelisted identifiers +
+  parameterized values. One tracked interim item: per-tenant auth (`_role`
+  simulation) → Supabase Auth JWT claims before production.
+
+**All 9 phases complete. The platform is functionally built across tiers L1–L5
+with the operational hardening in place.**
 
 ## Changelog
 
