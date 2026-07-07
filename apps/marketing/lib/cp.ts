@@ -22,6 +22,12 @@ declare global {
 }
 
 export function cp() {
-  globalThis.__mcp ??= postgres(url(), { max: 2, onnotice: () => {} });
+  const u = url();
+  const remote = !/localhost|127\.0\.0\.1/.test(u);
+  globalThis.__mcp ??= postgres(u, {
+    max: 2,
+    onnotice: () => {},
+    ...(remote ? { ssl: 'require' as const, prepare: false } : {}),
+  });
   return globalThis.__mcp;
 }

@@ -24,12 +24,13 @@ interface CacheEntry {
 
 export function createTenantResolver(opts: ResolverOptions) {
   const ttl = opts.cacheTtlMs ?? 30_000;
-  // Enable SSL for remote hosts (Supabase); off for local dev containers.
+  // Remote (Supabase): TLS + prepare:false (transaction pooler has no prepared
+  // statements). Local dev containers: plain.
   const remote = !/localhost|127\.0\.0\.1/.test(opts.controlPlaneUrl);
   const sql = postgres(opts.controlPlaneUrl, {
     max: 2,
     onnotice: () => {},
-    ...(remote ? { ssl: 'require' as const } : {}),
+    ...(remote ? { ssl: 'require' as const, prepare: false } : {}),
   });
   const cache = new Map<string, CacheEntry>();
 
