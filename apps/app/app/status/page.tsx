@@ -1,4 +1,5 @@
 import postgres from 'postgres';
+import { pgSsl } from '../../lib/pg';
 import { MODULES } from '@hr/entitlements';
 import { getTenantContext } from '../../lib/tenant';
 
@@ -24,7 +25,7 @@ export default async function StatusPage() {
     );
   }
 
-  const tdb = postgres(ctx.dbUrl, { max: 1, onnotice: () => {} });
+  const tdb = postgres(ctx.dbUrl, { max: 1, onnotice: () => {}, ...pgSsl(ctx.dbUrl) });
   let members = '0';
   let rates = '0';
   let metaCount = 0;

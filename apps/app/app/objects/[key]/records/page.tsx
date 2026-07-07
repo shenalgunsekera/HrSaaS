@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { pgSsl } from '../../../../lib/pg';
 import { notFound } from 'next/navigation';
 import postgres from 'postgres';
 import { editableFields, visibleFields, type FieldDefinition } from '@hr/schema-engine';
@@ -60,7 +61,7 @@ export default async function RecordsPage(routeCtx: {
 
   const ctx = await getTenantContext();
   if (!ctx) notFound();
-  const db = postgres(ctx.dbUrl, { max: 1, onnotice: () => {} });
+  const db = postgres(ctx.dbUrl, { max: 1, onnotice: () => {}, ...pgSsl(ctx.dbUrl) });
   try {
     const def = await getObject(db, key);
     if (!def) notFound();

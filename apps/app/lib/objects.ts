@@ -1,4 +1,5 @@
 import 'server-only';
+import { pgSsl } from './pg';
 import postgres from 'postgres';
 import type { ObjectDefinition } from '@hr/schema-engine';
 import { isProtectedCore } from '@hr/schema-engine';
@@ -12,7 +13,7 @@ export async function withTenantDb<T>(
 ): Promise<T | null> {
   const ctx = await getTenantContext();
   if (!ctx) return null;
-  const db = postgres(ctx.dbUrl, { max: 1, onnotice: () => {} });
+  const db = postgres(ctx.dbUrl, { max: 1, onnotice: () => {}, ...pgSsl(ctx.dbUrl) });
   try {
     return await fn(db, ctx);
   } finally {

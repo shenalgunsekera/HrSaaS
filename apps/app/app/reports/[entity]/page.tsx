@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { pgSsl } from '../../../lib/pg';
 import postgres from 'postgres';
 import { canUseModule } from '@hr/entitlements';
 import { ENTITIES, runEntityQuery } from '../../../lib/entities';
@@ -18,7 +19,7 @@ export default async function ReportPage(ctx0: { params: Promise<{ entity: strin
   const ctx = await getTenantContext();
   if (!ctx || !canUseModule(ctx.entitlements, def.moduleKey as never)) notFound();
 
-  const db = postgres(ctx.dbUrl, { max: 1, onnotice: () => {} });
+  const db = postgres(ctx.dbUrl, { max: 1, onnotice: () => {}, ...pgSsl(ctx.dbUrl) });
   let rows: Record<string, unknown>[] = [];
   try {
     rows = await runEntityQuery(db, def);
